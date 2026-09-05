@@ -2,7 +2,11 @@
 <meta name="theme-color" content="#17111F">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Éclat Arcade</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<title>Zolka</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Chakra+Petch:wght@600;700&family=Nunito:wght@400;600;700;900&display=swap">
@@ -407,8 +411,8 @@ h2.title{
     <!-- HOME -->
     <section class="screen on" id="s-home">
       <div class="brand">
-        <h1>ÉCLAT</h1>
-        <p>Arcade des formes</p>
+        <h1>ZOLKA</h1>
+        <p>Formes · Couleurs · Réflexes</p>
       </div>
       <div class="card">
         <button class="btn" id="goPlay">JOUER</button>
@@ -448,9 +452,9 @@ h2.title{
     <!-- SHOP -->
     <section class="screen" id="s-shop">
       <h2 class="title">Boutique</h2>
-      <p class="sub">Les éclats se gagnent en jouant. Habille tes formes, change de décor — le jeu ne change pas, le plaisir si.</p>
+      <p class="sub">Les zols se gagnent en jouant. Habille tes formes, change de décor — le jeu ne change pas, le plaisir si.</p>
       <div class="wallet">
-        <span class="lbl">Tes éclats</span>
+        <span class="lbl">Tes zols</span>
         <span class="amt"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 6.2L21 10l-5.1 4.2L17.4 21 12 17.4 6.6 21l1.5-6.8L3 10l6.6-1.8z"/></svg><span id="coinAmt">0</span></span>
       </div>
       <div class="shop-sec">
@@ -486,7 +490,7 @@ h2.title{
           <div id="finalRibbon"></div>
         </div>
         <div class="stats" id="finalStats"></div>
-        <div class="earn"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 6.2L21 10l-5.1 4.2L17.4 21 12 17.4 6.6 21l1.5-6.8L3 10l6.6-1.8z"/></svg><span id="finalCoins">+0 éclats</span></div>
+        <div class="earn"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 6.2L21 10l-5.1 4.2L17.4 21 12 17.4 6.6 21l1.5-6.8L3 10l6.6-1.8z"/></svg><span id="finalCoins">+0 zols</span></div>
         <button class="btn" id="again" style="margin-top:18px">REJOUER</button>
         <div class="btn-row">
           <button class="btn ghost" id="overModes">Autre mode</button>
@@ -568,7 +572,7 @@ const PRAISE_HOT = ["EN FEU !", "INARRÊTABLE !", "TU VOLES !", "LÉGENDAIRE !",
 /* ══════════════════════════════════════════════════════════
    1 · SAUVEGARDE
    ══════════════════════════════════════════════════════════ */
-const KEY = "eclat.arcade.v1";
+const KEY = "zolka.v1";
 const DEFAULT_SAVE = {
   coins: 250, sound: true, seen: true,
   best: { zen: 0, stress: 0, maitrise: 0 },
@@ -1600,7 +1604,7 @@ function endGame() {
     [S.hits, "Touches"], [acc + "%", "Précision"],
     ["×" + S.bestCombo, "Chaîne max"], ["P" + S.level, "Palier"]
   ].map(([v, l]) => `<div class="stat"><b>${v}</b><span>${l}</span></div>`).join("");
-  $("finalCoins").textContent = "+" + fmt(coins) + " éclats";
+  $("finalCoins").textContent = "+" + fmt(coins) + " zols";
 
   isRecord ? Sound.record() : Sound.over();
   showVeil("s-over");
@@ -1802,6 +1806,12 @@ addEventListener("keydown", e => {
   if (e.key === "Escape") { S.phase === "play" ? pauseGame() : (S.phase === "pause" && resumeGame()); }
   if (e.key === " " && S.phase === "over") { e.preventDefault(); startGame(S.mode); }
 });
+
+// PWA : installable et jouable hors ligne. Silencieux là où ça n'a pas de sens
+// (fichier local, page embarquée) — l'échec d'enregistrement ne casse rien.
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+}
 
 $("toggleSound").textContent = save.sound ? "🔊 Son activé" : "🔇 Son coupé";
 S.mode = "zen";
