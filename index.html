@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#17111F">
 <meta name="mobile-web-app-capable" content="yes">
@@ -431,7 +432,7 @@ h2.title{
     <!-- MODES -->
     <section class="screen" id="s-modes">
       <h2 class="title">Choisis ton régime</h2>
-      <p class="sub">Trois façons de lire les formes. Ton record est suivi séparément dans chaque mode.</p>
+      <p class="sub">Quatre façons de lire les formes. Ton record est suivi séparément dans chaque mode.</p>
       <div class="modes" id="modeList"></div>
       <button class="btn ghost" data-back="s-home">← Retour</button>
     </section>
@@ -445,6 +446,7 @@ h2.title{
         <div class="hint"><b>Tout n'est pas cliquable.</b> Les intrus ne répondent pas à la consigne. À partir du palier 4, des formes <i>scellées</i> apparaissent : cerclées de pointillés, elles sont interdites même si elles collent à la consigne.</div>
         <div class="hint"><b>La chaîne paie.</b> Chaque touche juste enchaînée gonfle le multiplicateur jusqu'à ×3. Une erreur la brise net.</div>
         <div class="hint"><b>Les formes dorées</b> se tapent toujours et rendent du temps.</div>
+        <div class="hint"><b>En Classique</b>, une seule forme paraît, éclairée 150 ms, puis s'éteint. Sa place reste frappable un instant : tu juges pendant l'éclair, tu frappes de mémoire. Si elle ne répond pas à la consigne, ne frappe pas.</div>
         <button class="btn ghost" data-back="s-home" style="margin-top:14px">← Retour</button>
       </div>
     </section>
@@ -563,6 +565,16 @@ const MODES = {
     decoyMax: 0.68, levelEvery: 13000, penaltyTime: 1000, penaltyScore: 150,
     colors0: 3, maxLevel: 9, locks: true, missBreaks: true, tricky: true,
     glyph: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>'
+  },
+  classic: {
+    name: "Classique", color: "#A96BFF",
+    desc: "Une seule forme, éclairée 150 ms. Elle s'éteint — sa place, elle, reste à frapper.",
+    time: 70, spawn0: 900, spawnMin: 400, life0: 1150, lifeMin: 620,
+    gap0: 850, gapMin: 340, flash: 150, grace: 1.35, solo: true,
+    decoyMax: 0.5, decoyRamp: 2.2, levelEvery: 11000,
+    penaltyTime: 800, penaltyScore: 0,
+    colors0: 2, maxLevel: 7, locks: false, missBreaks: true,
+    glyph: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3.4" fill="currentColor" stroke="none"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M18.8 5.2l-2.1 2.1M7.3 16.7l-2.1 2.1"/></svg>'
   }
 };
 
@@ -575,7 +587,7 @@ const PRAISE_HOT = ["EN FEU !", "INARRÊTABLE !", "TU VOLES !", "LÉGENDAIRE !",
 const KEY = "zolka.v1";
 const DEFAULT_SAVE = {
   coins: 250, sound: true, seen: true,
-  best: { zen: 0, stress: 0, maitrise: 0 },
+  best: { zen: 0, stress: 0, maitrise: 0, classic: 0 },
   owned: { shapes: ["classique"], decors: ["foire"] },
   equip: { shapes: "classique", decors: "foire" }
 };
@@ -979,7 +991,7 @@ const S = {
   beaten: false, shake: 0, flash: 0, flashCol: "#FF4D5E",
   energy: 0
 };
-let shapes = [], parts = [], pops = [], rings = [], texts = [], ripples = [];
+let shapes = [], parts = [], pops = [], rings = [], texts = [], ripples = [], ghosts = [];
 let bounds = { t: 120, l: 20, r: 0, b: 0 };
 let uid = 0;
 
@@ -990,8 +1002,13 @@ function levelParams() {
   const m = cfg(), L = Math.min(S.level, m.maxLevel);
   return {
     spawn: Math.max(m.spawnMin, m.spawn0 * Math.pow(.885, L - 1)),
-    life: Math.max(m.lifeMin, m.life0 - (L - 1) * 240),
-    decoy: Math.min(m.decoyMax, (L - 1) * .095),
+    // solo : « life » n'est plus la durée de vie mais la fenêtre de réponse,
+    // et « gap » le souffle entre deux formes. Décroissance douce, sinon on
+    // touche le plancher dès le palier 3.
+    gap: m.solo ? Math.max(m.gapMin, m.gap0 * Math.pow(.88, L - 1)) : 0,
+    life: m.solo ? Math.max(m.lifeMin, m.life0 * Math.pow(.93, L - 1))
+                 : Math.max(m.lifeMin, m.life0 - (L - 1) * 240),
+    decoy: Math.min(m.decoyMax, (L - 1) * .095 * (m.decoyRamp || 1)),
     nColors: Math.min(6, m.colors0 + Math.floor((L - 1) / 1.6)),
     nShapes: L >= 2 ? 3 : 2,
     maxAlive: Math.min(10, 4 + Math.floor(L / 1.7)),
@@ -1163,19 +1180,38 @@ function update(dt) {
 
   // apparitions
   const p = levelParams();
-  S.spawnAcc += dt;
-  if (S.spawnAcc >= p.spawn) { S.spawnAcc = 0; spawnShape(false); }
-  if (!shapes.some(s => !s.dead && !s.bonus && S.rule.test(s) && !s.locked)) spawnShape(true);
+  if (cfg().solo) {
+    // Une forme, puis la suivante : on n'enchaîne qu'une fois la précédente
+    // résolue — frappée ou éteinte.
+    if (!shapes.some(s => !s.dead)) {
+      S.spawnAcc += dt;
+      if (S.spawnAcc >= p.gap) { S.spawnAcc = 0; spawnShape(false); }
+    }
+  } else {
+    S.spawnAcc += dt;
+    if (S.spawnAcc >= p.spawn) { S.spawnAcc = 0; spawnShape(false); }
+    if (!shapes.some(s => !s.dead && !s.bonus && S.rule.test(s) && !s.locked)) spawnShape(true);
 
-  S.bonusAcc += dt;
-  if (S.bonusAcc > rnd(15000, 17000)) { S.bonusAcc = 0; spawnBonus(); }
+    S.bonusAcc += dt;
+    if (S.bonusAcc > rnd(15000, 17000)) { S.bonusAcc = 0; spawnBonus(); }
+  }
 
   // vieillissement
   for (const s of shapes) {
     s.born += dt;
     if (s.born > s.life && !s.dead) {
       s.dead = true;
-      if (!s.bonus && S.rule.test(s) && !s.locked && cfg().missBreaks && S.combo > 0) breakCombo();
+      const missed = !s.bonus && S.rule.test(s) && !s.locked;
+      if (missed && cfg().missBreaks && S.combo > 0) breakCombo();
+      if (cfg().flash && !s.bonus) {
+        // La forme était invisible : sans retour, l'erreur est incompréhensible.
+        if (missed) {
+          ghosts.push({ x: s.x, y: s.y, r: s.r, type: s.type, c: colors()[s.ci], t: 0, dur: 560 });
+          float(s.x, s.y - s.r - 12, "ELLE ÉTAIT LÀ", "#FF6F7E", 15, "body");
+        } else {
+          float(s.x, s.y, "BIEN VU", "#5AD3D1", 15, "body");
+        }
+      }
     }
   }
   shapes = shapes.filter(s => s.born < s.life + 320);
@@ -1190,12 +1226,15 @@ function update(dt) {
 
 /* — interaction — */
 function at(x, y) {
+  const m = cfg(), grace = m.grace || 1.1;   // on frappe de mémoire : marge plus large
   for (let i = shapes.length - 1; i >= 0; i--) {
     const s = shapes[i];
     if (s.dead) continue;
-    const k = s.born < 190 ? easeOutBack(s.born / 190) : 1;
-    if (k < .45) continue;
-    if (Math.hypot(s.x - x, s.y - y) <= s.r * 1.1) return s;
+    if (!m.flash) {
+      const k = s.born < 190 ? easeOutBack(s.born / 190) : 1;
+      if (k < .45) continue;
+    }
+    if (Math.hypot(s.x - x, s.y - y) <= s.r * grace) return s;
   }
   return null;
 }
@@ -1302,6 +1341,7 @@ function render(dt) {
 
   if (S.phase === "play" || S.phase === "pause" || S.phase === "count") {
     drawShapes(dt);
+    drawGhosts(dt);
     drawPops(dt);
     drawRings(dt);
     drawParts(dt);
@@ -1320,10 +1360,16 @@ function render(dt) {
 
 function drawShapes(dt) {
   const t = gt / 1000;
+  const fl = cfg().flash;
   for (const s of shapes) {
     let k, alpha = 1;
     if (s.dead) continue;
-    if (s.born < 190) k = easeOutBack(s.born / 190);
+    if (fl && !s.bonus) {
+      if (s.born >= fl) continue;              // le flash est passé : plus rien à voir
+      k = 1;                                   // pas de montée en taille : 190 ms > 150 ms
+      alpha = s.born > fl - 45 ? (fl - s.born) / 45 : 1;
+    }
+    else if (s.born < 190) k = easeOutBack(s.born / 190);
     else if (s.born > s.life - 300) {
       const u = (s.born - (s.life - 300)) / 300;
       k = 1 - u * .5; alpha = 1 - u;
@@ -1464,6 +1510,24 @@ function drawTexts(dt) {
   texts = texts.filter(f => f.t < f.dur);
 }
 
+function drawGhosts(dt) {
+  for (const g of ghosts) {
+    g.t += dt;
+    const u = clamp(g.t / g.dur, 0, 1);
+    ctx.save();
+    ctx.globalAlpha = (1 - u) * .75;
+    ctx.translate(g.x, g.y);
+    ctx.setLineDash([7, 7]);
+    ctx.lineDashOffset = -g.t * .04;
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = g.c;
+    shapePath(ctx, g.type, g.r * (1 + u * .14));
+    ctx.stroke();
+    ctx.restore();
+  }
+  ghosts = ghosts.filter(g => g.t < g.dur);
+}
+
 function drawRipples(dt) {
   for (const r of ripples) {
     r.t += dt;
@@ -1509,7 +1573,7 @@ function updateHUD() {
 
 // Sans record établi, on offre quand même une barre à franchir :
 // l'objectif doit exister dès la première partie.
-const FIRST_GOAL = { zen: 8000, stress: 6000, maitrise: 7000 };
+const FIRST_GOAL = { zen: 8000, stress: 6000, maitrise: 7000, classic: 5000 };
 function targetOf(mode) { return save.best[mode] > 0 ? save.best[mode] : FIRST_GOAL[mode]; }
 
 /* ══════════════════════════════════════════════════════════
@@ -1527,7 +1591,7 @@ function startGame(mode) {
   S.spawnAcc = 0; S.bonusAcc = 0; S.ruleAcc = 0;
   S.hits = 0; S.taps = 0; S.misses = 0;
   S.beaten = false; S.shake = 0; S.flash = 0; S.energy = 0;
-  shapes = []; parts = []; pops = []; rings = []; texts = []; ripples = [];
+  shapes = []; parts = []; pops = []; rings = []; texts = []; ripples = []; ghosts = [];
   S.rule = makeRule();
 
   $("rail").classList.remove("beaten");
@@ -1564,7 +1628,8 @@ function beginPlay() {
   S.phase = "play";
   last = performance.now();             // pas de bond de temps après un gel de frames
   measureBounds();
-  for (let i = 0; i < 3; i++) spawnShape(i === 0);
+  const n = cfg().solo ? 1 : 3;
+  for (let i = 0; i < n; i++) spawnShape(i === 0);
 }
 
 function pauseGame() {
