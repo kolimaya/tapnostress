@@ -568,12 +568,13 @@ const MODES = {
   },
   classic: {
     name: "Classique", color: "#A96BFF",
-    desc: "Une seule forme à la fois, visible de moins en moins longtemps. Du réflexe à l'état pur.",
-    time: 70, spawn0: 900, spawnMin: 400, life0: 1200, lifeMin: 600,
-    gap0: 850, gapMin: 340, lifeDecay: .895, popIn: 70, grace: 1.2, solo: true,
-    decoyMax: 0.5, decoyRamp: 2.2, levelEvery: 11000,
+    desc: "Un clignotement continu : une forme, puis la suivante, de plus en plus vite. Du réflexe à l'état pur.",
+    time: 70, spawn0: 900, spawnMin: 400, life0: 880, lifeMin: 540,
+    gap0: 150, gapMin: 60, gapDecay: .86, lifeDecay: .90,
+    popIn: 60, grace: 1.2, solo: true,
+    decoyMax: 0.5, decoyRamp: 2.2, levelEvery: 8000,
     penaltyTime: 800, penaltyScore: 0,
-    colors0: 2, maxLevel: 7, locks: false, missBreaks: true,
+    colors0: 2, maxLevel: 8, locks: false, missBreaks: true,
     glyph: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3.4" fill="currentColor" stroke="none"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M18.8 5.2l-2.1 2.1M7.3 16.7l-2.1 2.1"/></svg>'
   }
 };
@@ -1005,7 +1006,7 @@ function levelParams() {
     // solo : « life » n'est plus la durée de vie mais la fenêtre de réponse,
     // et « gap » le souffle entre deux formes. Décroissance douce, sinon on
     // touche le plancher dès le palier 3.
-    gap: m.solo ? Math.max(m.gapMin, m.gap0 * Math.pow(.88, L - 1)) : 0,
+    gap: m.solo ? Math.max(m.gapMin, m.gap0 * Math.pow(m.gapDecay || .88, L - 1)) : 0,
     life: m.solo ? Math.max(m.lifeMin, m.life0 * Math.pow(m.lifeDecay || .93, L - 1))
                  : Math.max(m.lifeMin, m.life0 - (L - 1) * 240),
     decoy: Math.min(m.decoyMax, (L - 1) * .095 * (m.decoyRamp || 1)),
@@ -1544,7 +1545,7 @@ function updateHUD() {
 
 // Sans record établi, on offre quand même une barre à franchir :
 // l'objectif doit exister dès la première partie.
-const FIRST_GOAL = { zen: 8000, stress: 6000, maitrise: 7000, classic: 5000 };
+const FIRST_GOAL = { zen: 8000, stress: 6000, maitrise: 7000, classic: 12000 };
 function targetOf(mode) { return save.best[mode] > 0 ? save.best[mode] : FIRST_GOAL[mode]; }
 
 /* ══════════════════════════════════════════════════════════
