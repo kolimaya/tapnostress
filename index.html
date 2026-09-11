@@ -7,7 +7,8 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
-<title>Zolka</title>
+<meta name="apple-mobile-web-app-title" content="TapNoStress">
+<title>Tap No Stress</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Chakra+Petch:wght@600;700&family=Nunito:wght@400;600;700;900&display=swap">
@@ -199,13 +200,14 @@ canvas,svg,img{-webkit-user-drag:none;user-drag:none}
 
 .brand{text-align:center;margin-bottom:22px}
 .brand h1{
-  margin:0;font-family:var(--f-display);font-size:clamp(48px,15vw,84px);line-height:1.02;
+  margin:0;font-family:var(--f-display);font-size:clamp(40px,12.5vw,76px);line-height:1.02;
   letter-spacing:.01em;padding-top:.06em;
   background:linear-gradient(175deg,var(--cream) 12%,var(--gold) 52%,var(--amber) 78%,var(--coral) 100%);
   -webkit-background-clip:text;background-clip:text;color:transparent;
   filter:drop-shadow(0 8px 26px rgba(255,158,61,.32));
 }
-.brand p{margin:10px 0 0;font-size:12px;letter-spacing:.34em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.brand h1 span{display:block}
+.brand p{margin:12px 0 0;font-size:12px;letter-spacing:.34em;text-transform:uppercase;color:var(--muted);font-weight:700}
 
 h2.title{
   font-family:var(--f-display);font-size:clamp(22px,5.4vw,30px);margin:0 0 4px;
@@ -412,7 +414,7 @@ h2.title{
     <!-- HOME -->
     <section class="screen on" id="s-home">
       <div class="brand">
-        <h1>ZOLKA</h1>
+        <h1><span>TAP</span> <span>NO STRESS</span></h1>
         <p>Formes · Couleurs · Réflexes</p>
       </div>
       <div class="card">
@@ -454,9 +456,9 @@ h2.title{
     <!-- SHOP -->
     <section class="screen" id="s-shop">
       <h2 class="title">Boutique</h2>
-      <p class="sub">Les zols se gagnent en jouant. Habille tes formes, change de décor — le jeu ne change pas, le plaisir si.</p>
+      <p class="sub">Les éclats se gagnent en jouant. Habille tes formes, change de décor — le jeu ne change pas, le plaisir si.</p>
       <div class="wallet">
-        <span class="lbl">Tes zols</span>
+        <span class="lbl">Tes éclats</span>
         <span class="amt"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 6.2L21 10l-5.1 4.2L17.4 21 12 17.4 6.6 21l1.5-6.8L3 10l6.6-1.8z"/></svg><span id="coinAmt">0</span></span>
       </div>
       <div class="shop-sec">
@@ -492,7 +494,7 @@ h2.title{
           <div id="finalRibbon"></div>
         </div>
         <div class="stats" id="finalStats"></div>
-        <div class="earn"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 6.2L21 10l-5.1 4.2L17.4 21 12 17.4 6.6 21l1.5-6.8L3 10l6.6-1.8z"/></svg><span id="finalCoins">+0 zols</span></div>
+        <div class="earn"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 6.2L21 10l-5.1 4.2L17.4 21 12 17.4 6.6 21l1.5-6.8L3 10l6.6-1.8z"/></svg><span id="finalCoins">+0 éclats</span></div>
         <button class="btn" id="again" style="margin-top:18px">REJOUER</button>
         <div class="btn-row">
           <button class="btn ghost" id="overModes">Autre mode</button>
@@ -585,7 +587,10 @@ const PRAISE_HOT = ["EN FEU !", "INARRÊTABLE !", "TU VOLES !", "LÉGENDAIRE !",
 /* ══════════════════════════════════════════════════════════
    1 · SAUVEGARDE
    ══════════════════════════════════════════════════════════ */
-const KEY = "zolka.v1";
+const KEY = "tapnostress.v1";
+// Sauvegardes des noms précédents : reprises, pour que records et achats
+// survivent au renommage. Elles ne sont jamais effacées.
+const LEGACY_KEYS = ["zolka.v1", "eclat.arcade.v1"];
 const DEFAULT_SAVE = {
   coins: 250, sound: true, seen: true,
   best: { zen: 0, stress: 0, maitrise: 0, classic: 0 },
@@ -596,7 +601,8 @@ let save = load();
 
 function load() {
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = localStorage.getItem(KEY)
+      || LEGACY_KEYS.map(k => localStorage.getItem(k)).find(Boolean);
     if (!raw) return structuredClone(DEFAULT_SAVE);
     const s = JSON.parse(raw);
     const d = structuredClone(DEFAULT_SAVE);
@@ -1641,7 +1647,7 @@ function endGame() {
     [S.hits, "Touches"], [acc + "%", "Précision"],
     ["×" + S.bestCombo, "Chaîne max"], ["P" + S.level, "Palier"]
   ].map(([v, l]) => `<div class="stat"><b>${v}</b><span>${l}</span></div>`).join("");
-  $("finalCoins").textContent = "+" + fmt(coins) + " zols";
+  $("finalCoins").textContent = "+" + fmt(coins) + " éclats";
 
   isRecord ? Sound.record() : Sound.over();
   showVeil("s-over");

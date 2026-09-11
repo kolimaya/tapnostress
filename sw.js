@@ -1,8 +1,8 @@
-/* Zolka — service worker
+/* Tap No Stress — service worker
    Coquille applicative en cache, polices en cache d'exécution.
    Une partie entière doit pouvoir se jouer hors ligne. */
 
-const VERSION = "zolka-v1";
+const VERSION = "tapnostress-v1";
 const SHELL = VERSION + "-shell";
 const FONTS = VERSION + "-fonts";
 
