@@ -1,0 +1,44 @@
+name: Fiche Play Store
+
+# Pousser la fiche Play Store (texte + images) par l'API Google Play.
+#
+# POURQUOI PAR API : la Play Console ouvre un sélecteur de fichiers natif pour
+# les images, impilotable en automatisation. L'API dépose les octets.
+#
+# SECRET REQUIS (à ajouter à CE dépôt) :
+#   PLAY_SERVICE_ACCOUNT_JSON — la clé JSON d'un compte de service Google Cloud
+#   (API « Google Play Developer » activée), invité dans « Utilisateurs et
+#   autorisations » de la Play Console avec le droit de modifier les fiches.
+#   C'est le même que qzr : un compte de service est autorisé au niveau du
+#   COMPTE développeur, il vaut donc pour Tap No Stress aussi.
+
+on:
+  workflow_dispatch:
+    inputs:
+      appliquer:
+        description: "Écrire réellement (sinon : constat, rien n'est écrit)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: fiche-play
+  cancel-in-progress: false
+
+jobs:
+  fiche:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Vérifier le secret
+        env:
+          SA: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          [ -n "$SA" ] || { echo "::error::PLAY_SERVICE_ACCOUNT_JSON manquant — voir l'en-tête de ce workflow."; exit 1; }
+      - name: Pousser la fiche
+        env:
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          node tools/play/fiche.mjs ${{ inputs.appliquer && '--appliquer' || '' }}

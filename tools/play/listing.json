@@ -1,0 +1,21 @@
+{
+  "_lisez_moi": "Fiche Play Store (texte + images), poussée par tools/play/fiche.mjs via l'API Google Play. Aucune valeur secrète ici.",
+  "package": "com.techobi.tapnostress",
+  "listings": {
+    "en-US": {
+      "title": "Tap No Stress",
+      "shortDescription": "Tap the right shapes before they fade. Beat your record. Zero stress.",
+      "fullDescription": "Tap No Stress is the reflex arcade that ramps up, and up, and up — without ever letting go.\n\nA rule appears: “tap the red squares.” Shapes pop in — circles, squares, triangles, in every color. Hit the right ones, fast, before they fade. Every target you land bursts with color and grows your multiplier. Careful: color matters as much as shape, and not everything is meant to be tapped.\n\nYour best score stays on screen at all times, a target to beat — and when you beat it, it's celebrated.\n\n• FOUR MODES\n– Zen: 90s, no penalty, to breathe and learn to read the colors.\n– Rush: 60s that melt away, every mistake costs time.\n– Mastery: twisted, reversed rules and sealed shapes to avoid.\n– Classic: a continuous blink, one shape at a time, pure reflex.\n\n• DIFFICULTY THAT TIGHTENS WITH CARE: faster, more colors, more decoys as you progress.\n\n• A SHOP OF SPARKS: earn sparks as you play, unlock shape packs and animated backdrops with depth of field.\n\n• PLAYABLE OFFLINE, no ads, no account, no fuss.\n\nTap right. Breathe. Again."
+    }
+  },
+  "images": {
+    "icon": "icons/icon-512.png",
+    "featureGraphic": "tools/appstore/media/feature-1024x500.png",
+    "phoneScreenshots": [
+      "tools/appstore/captures/android/1_home_android.png",
+      "tools/appstore/captures/android/2_modes_android.png",
+      "tools/appstore/captures/android/3_play_android.png",
+      "tools/appstore/captures/android/4_shop_android.png"
+    ]
+  }
+}

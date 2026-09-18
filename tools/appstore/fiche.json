@@ -42,6 +42,7 @@
   "verification": {
     "contactFirstName": "Roland",
     "contactLastName": "BODO",
+    "contactPhone": "+33642597695",
     "contactEmail": "bodo.roland@gmail.com",
     "demoAccountRequired": false,
     "notes": "Tap No Stress est un jeu d'arcade hors-ligne : on tape les formes qui correspondent à la consigne affichée en haut. Aucun compte, aucune connexion, aucune donnée collectée. Rien à configurer pour tester : ouvrir l'app, appuyer sur JOUER, choisir un mode."
