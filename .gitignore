@@ -17,3 +17,6 @@ mobile/package-lock.json
 # Divers
 .DS_Store
 Thumbs.db
+
+# Artefacts téléchargés (AAB/IPA)
+_dist/
