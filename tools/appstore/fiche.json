@@ -1,0 +1,51 @@
+{
+  "_lisez_moi": "État voulu de la fiche App Store de Tap No Stress. Lu par tools/appstore/fiche.mjs (adapté de qzr). Aucune valeur secrète ici.",
+  "app": {
+    "bundleId": "com.techobi.tapnostress",
+    "plateforme": "IOS"
+  },
+  "version": {
+    "versionString": "1.0",
+    "copyright": "2026 Roland BODO",
+    "releaseType": "MANUAL"
+  },
+  "fiche": {
+    "fr-FR": {
+      "name": "Tap No Stress",
+      "subtitle": "Formes, couleurs, réflexes",
+      "privacyPolicyUrl": "https://kolimaya.github.io/tapnostress/privacy.html",
+      "privacyChoicesUrl": null
+    },
+    "en-US": {
+      "name": "Tap No Stress",
+      "subtitle": "Shapes, colors, reflexes",
+      "privacyPolicyUrl": "https://kolimaya.github.io/tapnostress/privacy.html",
+      "privacyChoicesUrl": null
+    }
+  },
+  "versionLocalisations": {
+    "fr-FR": {
+      "description": "Tap No Stress, c'est l'arcade des réflexes qui monte, monte, monte — sans jamais vous lâcher.\n\nUne consigne s'affiche : « tape les carrés rouges ». Des formes surgissent — cercles, carrés, triangles, dans toutes les couleurs. À toi de frapper les bonnes, vite, avant qu'elles ne s'éteignent. Chaque cible touchée explose de couleur et gonfle ton multiplicateur. Attention : la couleur compte autant que la forme, et tout n'est pas à taper.\n\nTon meilleur score reste affiché en permanence, comme un objectif à dépasser — et quand tu le bats, ça se fête.\n\n• QUATRE MODES\n– Zen : 90 s sans sanction, pour respirer et apprendre à lire les couleurs.\n– Rush : 60 s qui fondent, chaque erreur coûte du temps.\n– Maîtrise : consignes retorses, renversées, et formes scellées à éviter.\n– Classique : un clignotement continu, une forme à la fois, réflexe pur.\n\n• UNE DIFFICULTÉ QUI SE DURCIT AVEC FINESSE : plus vite, plus de couleurs, plus d'intrus, à mesure que tu progresses.\n\n• UNE BOUTIQUE D'ÉCLATS : gagne des éclats en jouant, débloque des packs de formes et des décors animés avec profondeur de champ.\n\n• JOUABLE HORS LIGNE, sans pub, sans compte, sans prise de tête.\n\nTape juste. Respire. Recommence.",
+      "keywords": "arcade,réflexe,formes,couleurs,rapidité,concentration,zen,casual,tap,puzzle,score,réaction,cible",
+      "promotionalText": "Tape les bonnes formes avant qu'elles s'éteignent, bats ton record, débloque décors et packs. Quatre modes, zéro stress.",
+      "whatsNew": "Première version de Tap No Stress. Merci de jouer — et n'hésite pas à nous dire ce que tu en penses !",
+      "marketingUrl": "https://kolimaya.github.io/tapnostress/",
+      "supportUrl": "https://kolimaya.github.io/tapnostress/"
+    },
+    "en-US": {
+      "description": "Tap No Stress is the reflex arcade that ramps up, and up, and up — without ever letting go.\n\nA rule appears: “tap the red squares.” Shapes pop in — circles, squares, triangles, in every color. Hit the right ones, fast, before they fade. Every target you land bursts with color and grows your multiplier. Careful: color matters as much as shape, and not everything is meant to be tapped.\n\nYour best score stays on screen at all times, a target to beat — and when you beat it, it's celebrated.\n\n• FOUR MODES\n– Zen: 90s, no penalty, to breathe and learn to read the colors.\n– Rush: 60s that melt away, every mistake costs time.\n– Mastery: twisted, reversed rules and sealed shapes to avoid.\n– Classic: a continuous blink, one shape at a time, pure reflex.\n\n• DIFFICULTY THAT TIGHTENS WITH CARE: faster, more colors, more decoys as you progress.\n\n• A SHOP OF SPARKS: earn sparks as you play, unlock shape packs and animated backdrops with depth of field.\n\n• PLAYABLE OFFLINE, no ads, no account, no fuss.\n\nTap right. Breathe. Again.",
+      "keywords": "arcade,reflex,shapes,colors,speed,focus,zen,casual,tap,puzzle,score,reaction,fast,brain",
+      "promotionalText": "Tap the right shapes before they fade, beat your record, unlock backdrops and packs. Four modes, zero stress.",
+      "whatsNew": "First release of Tap No Stress. Thanks for playing — and let us know what you think!",
+      "marketingUrl": "https://kolimaya.github.io/tapnostress/",
+      "supportUrl": "https://kolimaya.github.io/tapnostress/"
+    }
+  },
+  "verification": {
+    "contactFirstName": "Roland",
+    "contactLastName": "BODO",
+    "contactEmail": "bodo.roland@gmail.com",
+    "demoAccountRequired": false,
+    "notes": "Tap No Stress est un jeu d'arcade hors-ligne : on tape les formes qui correspondent à la consigne affichée en haut. Aucun compte, aucune connexion, aucune donnée collectée. Rien à configurer pour tester : ouvrir l'app, appuyer sur JOUER, choisir un mode."
+  }
+}
