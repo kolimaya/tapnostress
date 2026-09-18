@@ -1,0 +1,111 @@
+name: Fiche App Store
+
+# Pousser la fiche App Store — captures et metadonnees — depuis le depot.
+#
+# POURQUOI UN WORKFLOW ET PAS SEULEMENT LA COMMANDE LOCALE
+# --------------------------------------------------------
+# La cle .p8 d'App Store Connect ne se telecharge QU'UNE FOIS. Celle de ce
+# compte a ete collee dans les secrets GitHub le jour ou `ios-build.yml` en a
+# eu besoin ; elle n'existe plus sur aucun poste. Faire tourner l'outil ici,
+# c'est se servir de la seule copie qui reste, sans la ressortir.
+#
+# AUCUN SECRET NOUVEAU. Ce sont les trois memes que le build iOS :
+#   APPSTORE_ISSUER_ID, APPSTORE_KEY_ID, APPSTORE_PRIVATE_KEY
+#
+# ROLE DE LA CLE. Ecrire une fiche exige « App Manager » ou « Admin ». Une cle
+# creee pour televerser des builds peut n'avoir que « Developer » : elle LIT
+# tout et n'ecrit rien. `etat` le dit en une minute, avant d'y passer l'apres-
+# midi — c'est la premiere commande a lancer.
+#
+# CE QUE CE WORKFLOW NE FAIT PAS : soumettre. Il prepare la version ; l'envoi
+# en verification reste une decision prise dans App Store Connect.
+
+on:
+  workflow_dispatch:
+    inputs:
+      commande:
+        description: "etat = inventaire | exporter = fabrique fiche.json | metadonnees | captures"
+        type: choice
+        options: [etat, exporter, metadonnees, captures]
+        default: etat
+      appliquer:
+        description: "Ecrire reellement dans App Store Connect (sinon : constat seul)"
+        type: boolean
+        default: false
+      remplacer:
+        description: "captures : supprimer les images en ligne avant de deposer les nouvelles"
+        type: boolean
+        default: false
+      version:
+        description: "Version visee (ex. 1.0). Vide = la version modifiable."
+        type: string
+        default: ""
+      langue:
+        description: "Limiter a une langue (ex. fr-FR). Vide = toutes celles declarees."
+        type: string
+        default: ""
+      bundle:
+        description: "Identifiant de bundle. Vide = celui de mobile/capacitor.config.json."
+        type: string
+        default: ""
+
+concurrency:
+  group: fiche-store
+  cancel-in-progress: false
+
+jobs:
+  fiche:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Verifie AVANT de lancer quoi que ce soit : un secret manquant se
+      # decouvrait sinon dans une trace d'erreur JWT illisible.
+      - name: Verifier les secrets
+        env:
+          ISSUER: ${{ secrets.APPSTORE_ISSUER_ID }}
+          KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+          PRIVATE_KEY: ${{ secrets.APPSTORE_PRIVATE_KEY }}
+        run: |
+          missing=""
+          [ -z "$ISSUER" ]      && missing="$missing APPSTORE_ISSUER_ID"
+          [ -z "$KEY_ID" ]      && missing="$missing APPSTORE_KEY_ID"
+          [ -z "$PRIVATE_KEY" ] && missing="$missing APPSTORE_PRIVATE_KEY"
+          if [ -n "$missing" ]; then
+            echo "::error::Secrets manquants :$missing — les memes que ios-build.yml."
+            exit 1
+          fi
+
+      # `appliquer: false` ne passe simplement pas le drapeau : l'outil est en
+      # constat par defaut, l'ecriture est un choix explicite a deux endroits.
+      - name: Lancer
+        env:
+          APPSTORE_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+          APPSTORE_KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+          APPSTORE_PRIVATE_KEY: ${{ secrets.APPSTORE_PRIVATE_KEY }}
+          # Facultatif : le mot de passe du compte de demonstration, si un jour
+          # il doit etre pose. Absent du depot, absent de fiche.json.
+          APPSTORE_DEMO_MDP: ${{ secrets.APPSTORE_DEMO_MDP }}
+        run: |
+          drapeaux=""
+          [ "${{ inputs.appliquer }}" = "true" ] && drapeaux="$drapeaux --appliquer"
+          [ "${{ inputs.remplacer }}" = "true" ] && drapeaux="$drapeaux --remplacer"
+          [ -n "${{ inputs.version }}" ] && drapeaux="$drapeaux --version=${{ inputs.version }}"
+          [ -n "${{ inputs.langue }}" ]  && drapeaux="$drapeaux --langue=${{ inputs.langue }}"
+          [ -n "${{ inputs.bundle }}" ]  && drapeaux="$drapeaux --bundle=${{ inputs.bundle }}"
+          echo "commande : ${{ inputs.commande }}$drapeaux"
+          node tools/appstore/fiche.mjs ${{ inputs.commande }} $drapeaux
+
+      # `exporter` ecrit un fichier que le runner emporte avec lui. On le
+      # ressort en artefact : c'est ce fichier qu'il faut committer.
+      - name: Recuperer fiche.json
+        if: ${{ inputs.commande == 'exporter' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: fiche-json
+          path: tools/appstore/fiche.json
+          retention-days: 14

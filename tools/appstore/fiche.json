@@ -47,5 +47,39 @@
     "contactEmail": "bodo.roland@gmail.com",
     "demoAccountRequired": false,
     "notes": "Tap No Stress est un jeu d'arcade hors-ligne : on tape les formes qui correspondent à la consigne affichée en haut. Aucun compte, aucune connexion, aucune donnée collectée. Rien à configurer pour tester : ouvrir l'app, appuyer sur JOUER, choisir un mode."
+  },
+  "captures": {
+    "fr-FR": {
+      "APP_IPHONE_67": {
+        "dimensions": [
+          [
+            1290,
+            2796
+          ]
+        ],
+        "fichiers": [
+          "tools/appstore/captures/ios/1_home_ios69.png",
+          "tools/appstore/captures/ios/2_modes_ios69.png",
+          "tools/appstore/captures/ios/3_play_ios69.png",
+          "tools/appstore/captures/ios/4_shop_ios69.png"
+        ]
+      }
+    },
+    "en-US": {
+      "APP_IPHONE_67": {
+        "dimensions": [
+          [
+            1290,
+            2796
+          ]
+        ],
+        "fichiers": [
+          "tools/appstore/captures/ios/1_home_ios69.png",
+          "tools/appstore/captures/ios/2_modes_ios69.png",
+          "tools/appstore/captures/ios/3_play_ios69.png",
+          "tools/appstore/captures/ios/4_shop_ios69.png"
+        ]
+      }
+    }
   }
 }
