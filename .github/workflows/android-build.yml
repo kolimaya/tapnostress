@@ -85,6 +85,28 @@ jobs:
             --splashBackgroundColor '#17111F' \
             --splashBackgroundColorDark '#17111F'
 
+      - name: Cibler l'API 36 (exigence Play)
+        working-directory: mobile
+        run: |
+          set -euo pipefail
+          # Google Play refuse depuis 2026 tout bundle ciblant moins que l'API 36
+          # (constate au deploiement : « doit cibler au minimum le niveau d'API 36 »).
+          # Capacitor 7 genere compileSdk/targetSdk = 35 dans variables.gradle ;
+          # on les porte a 36. targetSdk <= compileSdk, donc les deux montent.
+          VARS=android/variables.gradle
+          sed -i -E 's/compileSdkVersion *= *[0-9]+/compileSdkVersion = 36/' "$VARS"
+          sed -i -E 's/targetSdkVersion *= *[0-9]+/targetSdkVersion = 36/' "$VARS"
+          grep -nE "compileSdkVersion|targetSdkVersion" "$VARS"
+          # L'AGP livre par Capacitor 7 est teste jusqu'a l'API 35 ; compiler
+          # contre 36 declenche un avertissement qu'on leve, sinon le build peut
+          # s'arreter dessus. Le binaire reste valide : seule la version de test
+          # de l'AGP est en cause.
+          echo "android.suppressUnsupportedCompileSdk=36" >> android/gradle.properties
+          # La plateforme android-36 doit etre installee sur le runner.
+          yes | "${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;36.0.0" >/dev/null 2>&1 \
+            || yes | sdkmanager "platforms;android-36" "build-tools;36.0.0" >/dev/null 2>&1 \
+            || echo "note: installation SDK 36 non confirmee — le build dira s'il manque."
+
       - name: Numeroter la version
         working-directory: mobile
         run: |
