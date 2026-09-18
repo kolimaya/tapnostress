@@ -1,0 +1,85 @@
+name: Diag auth App Store Connect
+
+# Teste UNIQUEMENT l'authentification de la clé API App Store Connect, sans rien
+# compiler. Un build iOS complet dure ~5 min sur macOS ; ce diagnostic tourne en
+# ~20 s sur Ubuntu, ce qui permet d'itérer sur un 401 sans gaspiller.
+#
+# Il n'expose AUCUN secret : il n'imprime que des longueurs, des booléens de
+# forme, et le code HTTP renvoye par Apple. Jamais les valeurs.
+
+on:
+  workflow_dispatch: {}
+
+concurrency:
+  group: diag-asc-auth
+  cancel-in-progress: true
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Signer un JWT et interroger l'API
+        env:
+          ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+          KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+          PRIVATE_KEY: ${{ secrets.APPSTORE_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          pip install --quiet pyjwt cryptography
+          python - <<'PY'
+          import os, re, time, json, urllib.request, urllib.error
+
+          iss = os.environ.get("ISSUER_ID", "")
+          kid = os.environ.get("KEY_ID", "")
+          key = os.environ.get("PRIVATE_KEY", "")
+
+          print("=== Forme des secrets (aucune valeur affichée) ===")
+          uuid = re.compile(r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
+          print(f"ISSUER  : longueur brute={len(iss)} | sans espaces={len(iss.strip())} | UUID valide={bool(uuid.match(iss.strip()))}")
+          print(f"KEY_ID  : longueur brute={len(kid)} | sans espaces={len(kid.strip())} | ={kid.strip()!r}")
+          has_begin = "BEGIN PRIVATE KEY" in key
+          print(f".p8     : longueur={len(key)} | en-tête PEM présent={has_begin} | lignes={key.count(chr(10))+1}")
+
+          if len(iss) != len(iss.strip()):
+              print("::warning:: L'Issuer ID porte des espaces/retours à la ligne parasites — cause classique de 401.")
+          if len(kid) != len(kid.strip()):
+              print("::warning:: Le Key ID porte des espaces/retours à la ligne parasites.")
+
+          try:
+              import jwt
+          except Exception as e:
+              print("::error:: pyjwt indisponible :", e); raise SystemExit(1)
+
+          now = int(time.time())
+          try:
+              tok = jwt.encode(
+                  {"iss": iss.strip(), "iat": now, "exp": now + 300, "aud": "appstoreconnect-v1"},
+                  key, algorithm="ES256", headers={"kid": kid.strip()})
+          except Exception as e:
+              print("::error:: Échec de SIGNATURE du JWT — la .p8 est illisible ou ne correspond pas à ES256 :", repr(e))
+              raise SystemExit(1)
+          print("JWT signé : OK (la .p8 est une clé EC valide).")
+
+          req = urllib.request.Request(
+              "https://api.appstoreconnect.apple.com/v1/apps?limit=1",
+              headers={"Authorization": "Bearer " + tok})
+          try:
+              r = urllib.request.urlopen(req, timeout=30)
+              print(f"=== HTTP {r.status} — AUTHENTIFICATION RÉUSSIE ===")
+              data = json.loads(r.read().decode())
+              print("apps visibles par cette clé :", data.get("meta", {}).get("paging", {}).get("total", "?"))
+          except urllib.error.HTTPError as e:
+              body = e.read().decode()[:400]
+              print(f"=== HTTP {e.code} — AUTH REFUSÉE ===")
+              print(body)
+              if e.code == 401:
+                  print("::error:: 401 = la clé/l'issuer sont rejetés. Soit l'Issuer ID est faux, soit CETTE clé est révoquée/expirée.")
+              elif e.code == 403:
+                  print("::error:: 403 = la clé s'authentifie mais n'a pas les droits (rôle insuffisant).")
+              raise SystemExit(1)
+          PY
