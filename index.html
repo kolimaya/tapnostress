@@ -363,10 +363,16 @@ h2.title{
 .hint b{color:var(--teal)}
 
 @media (max-width:520px){
-  #hud{grid-template-columns:1fr auto;gap:8px;
+  /* Grille en zones : score en haut à gauche, chrono/pause/palier en haut à
+     droite (alignés), et la consigne en pleine largeur juste dessous — sans
+     que la colonne de droite ne se fasse repousser vers le bas. */
+  #hud{grid-template-columns:1fr auto;gap:6px 8px;align-items:start;
+       grid-template-areas:"score right" "rule rule";
        padding:calc(12px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right))
                0 calc(12px + env(safe-area-inset-left))}
-  .rule{grid-column:1/-1;justify-self:center;margin-top:2px}
+  .score-wrap{grid-area:score}
+  .hud-col-r{grid-area:right}
+  .rule{grid-area:rule;justify-self:center;margin-top:4px}
   .rail{width:min(56vw,220px)}
   .stats{grid-template-columns:repeat(2,1fr)}
   .item{grid-template-columns:auto 1fr;grid-template-rows:auto auto}
