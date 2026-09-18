@@ -1,0 +1,19 @@
+# Enveloppe native Capacitor — regeneree a chaque build, jamais versionnee.
+mobile/node_modules/
+mobile/www/
+mobile/ios/
+mobile/android/
+mobile/package-lock.json
+
+# Secrets de signature : ne doivent JAMAIS entrer dans le depot.
+# Ils vivent uniquement dans les secrets GitHub Actions.
+*.jks
+*.keystore
+*.p12
+*.mobileprovision
+*.p8
+*.jks.b64
+
+# Divers
+.DS_Store
+Thumbs.db

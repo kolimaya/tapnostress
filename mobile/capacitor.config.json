@@ -1,0 +1,27 @@
+{
+  "appId": "com.techobi.tapnostress",
+  "appName": "Tap No Stress",
+  "webDir": "www",
+  "loggingBehavior": "none",
+  "backgroundColor": "#17111F",
+  "ios": {
+    "backgroundColor": "#17111F",
+    "contentInset": "never"
+  },
+  "android": {
+    "backgroundColor": "#17111F",
+    "allowMixedContent": false
+  },
+  "plugins": {
+    "StatusBar": {
+      "overlaysWebView": true,
+      "style": "DARK",
+      "backgroundColor": "#00000000"
+    }
+  },
+  "server": {
+    "androidScheme": "https",
+    "iosScheme": "capacitor",
+    "cleartext": false
+  }
+}

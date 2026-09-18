@@ -514,6 +514,26 @@ h2.title{
    ══════════════════════════════════════════════════════════ */
 const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+// Retour haptique — actif uniquement dans l'enveloppe native (Capacitor).
+// Sur le web, window.Capacitor est absent : l'appel ne coute rien et ne casse
+// rien. C'est ce que le plugin @capacitor/haptics rend possible, et c'est ce
+// qui donne au tap une vraie presence physique sur l'appareil.
+const hpt = (() => {
+  let H = null, ready = false;
+  const boot = () => {
+    if (ready) return; ready = true;
+    try { H = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics || null; } catch (e) { H = null; }
+  };
+  return (kind) => {
+    boot(); if (!H) return;
+    try {
+      if (kind === "hit") H.impact({ style: "LIGHT" });
+      else if (kind === "err") H.impact({ style: "HEAVY" });
+      else if (kind === "bonus") H.notification({ type: "SUCCESS" });
+    } catch (e) {}
+  };
+})();
+
 const SHAPES = ["circle", "square", "triangle"];
 const SHAPE_FR = { circle: "CERCLES", square: "CARRÉS", triangle: "TRIANGLES" };
 
@@ -1255,7 +1275,7 @@ function tap(x, y) {
     ring(s.x, s.y, "#FFD75E", s.r * .5, s.r * 3.4, 560);
     float(s.x, s.y - s.r - 12, "+2,5 s", "#FFD75E", 22);
     float(s.x, s.y + 6, "CADEAU !", "#FFF3E2", 15);
-    Sound.bonus(); S.shake = RM ? 0 : 7; S.flash = .35; S.flashCol = "#FFD75E";
+    Sound.bonus(); hpt("bonus"); S.shake = RM ? 0 : 7; S.flash = .35; S.flashCol = "#FFD75E";
     bump(); return;
   }
 
@@ -1272,7 +1292,7 @@ function tap(x, y) {
     float(s.x, s.y - s.r - 10, why, "#FF6F7E", 15);
     if (m.penaltyTime) float(s.x, s.y + 8, "−" + (m.penaltyTime / 1000).toFixed(1).replace(".", ",") + " s", "#FF4D5E", 17);
     else if (m.penaltyScore) float(s.x, s.y + 8, "−" + m.penaltyScore, "#FF4D5E", 17);
-    Sound.err(); S.shake = RM ? 0 : 12; S.flash = .5; S.flashCol = "#FF4D5E";
+    Sound.err(); hpt("err"); S.shake = RM ? 0 : 12; S.flash = .5; S.flashCol = "#FF4D5E";
     breakCombo();
     return;
   }
@@ -1294,7 +1314,7 @@ function tap(x, y) {
   const word = S.combo >= 8 ? pick(PRAISE_HOT) : pick(PRAISE);
   float(s.x, s.y - s.r - 14, word, S.combo >= 8 ? "#FFD75E" : col, S.combo >= 8 ? 21 : 17);
   if (S.combo > 0 && S.combo % 5 === 0) float(W / 2, bounds.b - 70, "CHAÎNE ×" + S.combo, "#FF9E3D", 30);
-  Sound.hit(S.combo);
+  Sound.hit(S.combo); hpt("hit");
   S.shake = RM ? 0 : 4 + power * 2; S.flash = .18; S.flashCol = col;
   bump();
 

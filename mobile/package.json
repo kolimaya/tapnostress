@@ -1,0 +1,23 @@
+{
+  "name": "tapnostress-mobile",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Enveloppe native Tap No Stress (Capacitor). Le jeu vit a la racine du depot ; ce dossier n'en est que l'emballage. Les projets ios/ et android/ sont REGENERES a chaque build, jamais versionnes.",
+  "scripts": {
+    "build:web": "node build-web.mjs",
+    "sync": "npm run build:web && cap sync"
+  },
+  "dependencies": {
+    "@capacitor/app": "^7.0.0",
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/haptics": "^7.0.0",
+    "@capacitor/status-bar": "^7.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/assets": "^3.0.6",
+    "@capacitor/cli": "^7.0.0",
+    "@capacitor/ios": "^7.0.0"
+  }
+}

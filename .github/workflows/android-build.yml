@@ -1,0 +1,206 @@
+name: Build Android
+
+# Produire l'app Android : un APK de debug pour tester, ou un AAB signe pour le
+# Play Store.
+#
+# DEUX MODES
+#   unsigned  assembleDebug -> APK installable, aucun secret requis. Valide la
+#             chaine de build et se pose sur un appareil pour essayer.
+#   release   bundleRelease -> AAB signe pour Play. Exige les quatre secrets.
+#
+# Android ne demande NI Mac NI compte payant pour l'APK de debug : le mode
+# unsigned marche immediatement.
+#
+# LE TOUT PREMIER DEPOT SUR PLAY RESTE MANUEL. L'API Play ne sait que MODIFIER
+# une app ayant deja recu un binaire ; le premier AAB s'importe via la Play
+# Console. Ce workflow produit l'AAB signe et le conserve en artefact ; son
+# envoi automatique pourra etre ajoute ensuite.
+#
+# SECRETS POUR LE MODE release
+#   ANDROID_KEYSTORE_B64       le keystore .jks encode en base64 NU (pas de PEM)
+#   ANDROID_KEYSTORE_PASSWORD  mot de passe du keystore
+#   ANDROID_KEY_ALIAS          alias de la cle
+#   ANDROID_KEY_PASSWORD       mot de passe de la cle
+#
+# FABRIQUER LE KEYSTORE (une seule fois, hors du depot) :
+#   keytool -genkeypair -v -keystore tapnostress-upload.jks -alias tapnostress \
+#           -keyalg RSA -keysize 2048 -validity 10000
+#   base64 -w0 tapnostress-upload.jks > tapnostress-upload.jks.b64   (Git Bash)
+# Avec Play App Signing, cette cle est la cle de TELEVERSEMENT : la perdre se
+# rattrape, la publier non.
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "unsigned = APK de debug (aucun secret) | release = AAB signe pour Play"
+        type: choice
+        options: [unsigned, release]
+        default: unsigned
+
+concurrency:
+  group: android-build
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      # fetch-depth: 0 est obligatoire : le versionCode derive du nombre de
+      # commits. Un clone superficiel repondrait 1 — credible, et un recul que
+      # Play rejetterait.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # JDK 21 : les versions plus recentes livrees avec Android Studio ne
+      # fonctionnent pas avec le Gradle de Capacitor. On choisit explicitement.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # android/ n'est pas versionne : on le regenere depuis capacitor.config.json.
+      - name: Installer les dependances et assembler le bundle web
+        working-directory: mobile
+        run: |
+          set -euo pipefail
+          npm install --no-audit --no-fund
+          npm run build:web
+          npx cap add android
+
+      - name: Icone de l'application
+        working-directory: mobile
+        run: |
+          set -euo pipefail
+          npx capacitor-assets generate --android \
+            --iconBackgroundColor '#17111F' \
+            --iconBackgroundColorDark '#17111F' \
+            --splashBackgroundColor '#17111F' \
+            --splashBackgroundColorDark '#17111F'
+
+      - name: Numeroter la version
+        working-directory: mobile
+        run: |
+          set -euo pipefail
+          # versionCode = nombre de commits (strictement croissant, ce que Play
+          # exige). versionName = <VERSION>.<nombre de commits>, la meme regle
+          # que le numero de build iOS. Capacitor ecrit 1 / "1.0" en dur.
+          if git rev-parse --is-shallow-repository | grep -q true; then
+            echo "::error::Clone superficiel — versionCode serait tronque. fetch-depth: 0 requis."; exit 1
+          fi
+          CODE="$(git -C "$GITHUB_WORKSPACE" rev-list --count HEAD)"
+          BASE="$(tr -d ' \t\r\n' < "$GITHUB_WORKSPACE/VERSION")"
+          NAME="${BASE}.${CODE}"
+          GRADLE=android/app/build.gradle
+          sed -i -E "s/versionCode +[0-9]+/versionCode ${CODE}/" "$GRADLE"
+          sed -i -E "s/versionName +\"[^\"]*\"/versionName \"${NAME}\"/" "$GRADLE"
+          grep -nE "versionCode|versionName" "$GRADLE"
+          echo "Tap No Stress Android : versionName ${NAME}, versionCode ${CODE}"
+
+      # --- MODE NON SIGNE : APK de debug, installable ---------------------
+      - name: Compiler l'APK de debug
+        if: ${{ github.event.inputs.mode != 'release' }}
+        working-directory: mobile/android
+        run: |
+          set -euo pipefail
+          chmod +x ./gradlew
+          ./gradlew --no-daemon assembleDebug
+
+      - name: Conserver l'APK de debug
+        if: ${{ github.event.inputs.mode != 'release' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: tapnostress-android-apk-debug
+          path: mobile/android/app/build/outputs/apk/debug/*.apk
+          retention-days: 14
+
+      # --- MODE RELEASE : AAB signe ---------------------------------------
+      - name: Verifier les secrets
+        if: ${{ github.event.inputs.mode == 'release' }}
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          missing=""
+          [ -z "$KEYSTORE" ]          && missing="$missing ANDROID_KEYSTORE_B64"
+          [ -z "$KEYSTORE_PASSWORD" ] && missing="$missing ANDROID_KEYSTORE_PASSWORD"
+          [ -z "$KEY_ALIAS" ]         && missing="$missing ANDROID_KEY_ALIAS"
+          [ -z "$KEY_PASSWORD" ]      && missing="$missing ANDROID_KEY_PASSWORD"
+          [ -z "$missing" ] || { echo "::error::Secrets manquants :$missing"; exit 1; }
+
+      - name: Poser le keystore
+        if: ${{ github.event.inputs.mode == 'release' }}
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+        run: |
+          set -euo pipefail
+          # On tolere un secret au format PEM (certutil -encode) en retirant ses
+          # lignes d'encadrement, plutot que d'echouer sur un message obscur.
+          if printf '%s' "$KEYSTORE_B64" | grep -q -- '-----BEGIN'; then
+            echo "::warning::Secret au format PEM — lignes d'encadrement retirees."
+          fi
+          printf '%s' "$KEYSTORE_B64" | tr -d '\r' | grep -v -- '^-----' | base64 -d > "$RUNNER_TEMP/upload.jks"
+          taille=$(stat -c%s "$RUNNER_TEMP/upload.jks")
+          entete=$(head -c 4 "$RUNNER_TEMP/upload.jks" | od -An -tx1 | tr -d ' \n')
+          echo "keystore : $taille octets, entete $entete"
+          [ "$taille" -ge 1000 ] || { echo "::error::Keystore de $taille octets — secret tronque."; exit 1; }
+          case "$entete" in
+            3082*|feedfeed) : ;;
+            *) echo "::error::Le secret ne decode pas en keystore (entete $entete)."; exit 1 ;;
+          esac
+
+      - name: Compiler l'AAB signe
+        if: ${{ github.event.inputs.mode == 'release' }}
+        working-directory: mobile/android
+        env:
+          KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KS_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KS_KEY_PASS: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          chmod +x ./gradlew
+          # Signature injectee par proprietes Gradle : l'AGP signe la cible
+          # release sans qu'on touche a build.gradle ni qu'un keystore.properties
+          # traine dans le depot.
+          ./gradlew --no-daemon bundleRelease \
+            -Pandroid.injected.signing.store.file="$RUNNER_TEMP/upload.jks" \
+            -Pandroid.injected.signing.store.password="$KS_PASS" \
+            -Pandroid.injected.signing.key.alias="$KS_ALIAS" \
+            -Pandroid.injected.signing.key.password="$KS_KEY_PASS"
+
+      # On verifie l'ARTEFACT, pas l'etape : Gradle produit un AAB non signe
+      # sans broncher si la signature manque, et Play ne le refuserait que
+      # bien plus tard.
+      - name: Verifier que l'AAB est signe
+        if: ${{ github.event.inputs.mode == 'release' }}
+        run: |
+          set -euo pipefail
+          AAB="$(find mobile/android/app/build/outputs/bundle/release -name '*.aab' | head -1)"
+          [ -n "$AAB" ] || { echo "::error::aucun AAB produit."; exit 1; }
+          echo "AAB : $AAB — $(stat -c%s "$AAB") octets"
+          if unzip -l "$AAB" | grep -qE 'META-INF/.*\.(RSA|DSA|EC)'; then
+            echo "signature presente."
+          else
+            echo "::error::AAB NON SIGNE — verifier les quatre secrets."; exit 1
+          fi
+
+      - name: Conserver l'AAB
+        if: ${{ github.event.inputs.mode == 'release' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: tapnostress-android-aab
+          path: mobile/android/app/build/outputs/bundle/release/*.aab
+          retention-days: 14
+
+      - name: Nettoyer
+        if: ${{ always() }}
+        run: rm -f "$RUNNER_TEMP/upload.jks"

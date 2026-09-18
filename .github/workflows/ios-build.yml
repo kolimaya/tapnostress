@@ -1,0 +1,356 @@
+name: Build iOS
+
+# Compiler iOS exige macOS et Xcode : le runner macOS de GitHub Actions fait le
+# travail, on n'a pas besoin de posseder un Mac. TestFlight distribue ensuite le
+# resultat sur les appareils.
+#
+# DEUX MODES
+#   unsigned    Compile SANS signature. Aucun secret, aucun compte Apple requis.
+#               Valide que la chaine de build tient debout — a lancer en premier.
+#   testflight  Compile, signe et televerse. Exige les six secrets ci-dessous.
+#
+# Jamais declenche automatiquement : un runner macOS brule les minutes Actions
+# ~10x plus vite qu'un Linux. On compile quand on le decide.
+#
+# SECRETS POUR LE MODE testflight
+#   APPLE_CERTIFICATE_P12       certificat de distribution (.p12) en base64
+#   APPLE_CERTIFICATE_PASSWORD  mot de passe de ce .p12
+#   APPLE_PROVISIONING_PROFILE  profil de provisionnement (.mobileprovision) en base64
+#   APPSTORE_ISSUER_ID          App Store Connect > Users and Access > Integrations
+#   APPSTORE_KEY_ID             idem
+#   APPSTORE_PRIVATE_KEY        la cle .p8 (contenu brut, pas base64)
+#
+# Le compte Apple (equipe techobi) et la cle .p8 existent deja pour un autre
+# projet ; ces secrets doivent etre AJOUTES a CE depot (les secrets ne sont pas
+# partages entre depots). Seuls un nouvel App ID com.techobi.tapnostress et un
+# profil de provisionnement pour ce bundle sont a creer dans le portail Apple.
+#
+# Encoder un fichier en base64 :  base64 -w0 fichier   (Linux/Git Bash)
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "unsigned = compile sans signer (aucun secret) | testflight = signe et televerse"
+        type: choice
+        options: [unsigned, testflight]
+        default: unsigned
+
+concurrency:
+  group: ios-build
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: macos-latest
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # App Store Connect refuse les binaires construits avec un SDK trop ancien
+      # (constate sur un autre projet : « must be built with the iOS 26 SDK or
+      # later »). On PRIVILEGIE l'Xcode par defaut du runner, qui est complet :
+      # forcer un Xcode precis a deja selectionne, deux fois, un Xcode dont la
+      # PLATEFORME iOS n'etait pas reellement installee. On se contente donc de
+      # verifier que le defaut satisfait le seuil, et qu'un SDK iphoneos existe.
+      - name: Verifier Xcode et le SDK iOS
+        run: |
+          set -euo pipefail
+          MIN_XCODE=26
+          DEFAULT_VERSION="$(xcodebuild -version 2>/dev/null || true)"
+          DEFAULT_MAJOR="${DEFAULT_VERSION#Xcode }"; DEFAULT_MAJOR="${DEFAULT_MAJOR%%.*}"
+          case "$DEFAULT_MAJOR" in ''|*[!0-9]*) DEFAULT_MAJOR=0 ;; esac
+          echo "Xcode par defaut : ${DEFAULT_VERSION%%$'\n'*} (majeur $DEFAULT_MAJOR)"
+          if [ "$DEFAULT_MAJOR" -lt "$MIN_XCODE" ]; then
+            echo "Defaut trop ancien. Recherche du plus recent Xcode >= $MIN_XCODE..."
+            CANDIDAT="$(ls -d /Applications/Xcode*.app 2>/dev/null \
+              | sed -E 's#.*/Xcode_?([0-9.]*)\.app#\1 &#' \
+              | sort -V -k1,1 | tail -1 | awk '{print $2}')"
+            [ -n "$CANDIDAT" ] || { echo "::error::Aucun Xcode installe."; exit 1; }
+            V="$("$CANDIDAT/Contents/Developer/usr/bin/xcodebuild" -version 2>/dev/null || true)"
+            M="${V#Xcode }"; M="${M%%.*}"; case "$M" in ''|*[!0-9]*) M=0 ;; esac
+            [ "$M" -ge "$MIN_XCODE" ] || { echo "::error::Le plus recent Xcode du runner est le $M, or Apple exige le $MIN_XCODE. Un televersement echouerait en validation."; exit 1; }
+            echo "Bascule sur $CANDIDAT"
+            sudo xcode-select -s "$CANDIDAT/Contents/Developer"
+          fi
+          # La plateforme iOS doit etre reellement installee. Idempotent : on
+          # tente, sans en faire une condition (un echec de simulateur n'empeche
+          # pas un archivage iphoneos).
+          xcodebuild -downloadPlatform iOS 2>&1 | tail -3 || \
+            echo "note: -downloadPlatform n'a pas abouti ; le SDK reel est verifie ci-dessous."
+          xcodebuild -version
+          SDKS="$(xcodebuild -showsdks)"; echo "$SDKS" | grep -i ios || true
+          echo "$SDKS" | grep -q 'iphoneos' || { echo "::error::Aucun SDK iphoneos — archivage impossible."; exit 1; }
+          echo "SDK iphoneos present."
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # ios/ n'est pas versionne : on le regenere depuis capacitor.config.json.
+      - name: Installer les dependances et assembler le bundle web
+        working-directory: mobile
+        run: |
+          set -euo pipefail
+          npm install --no-audit --no-fund
+          npm run build:web
+          npx cap add ios
+
+      - name: Icone de l'application
+        working-directory: mobile
+        run: |
+          set -euo pipefail
+          # @capacitor/assets lit mobile/assets/icon.png et genere le jeu
+          # d'icones iOS complet (avec Contents.json) dans le projet regenere.
+          # L'icone source est en RVB sans alpha : Apple refuse l'alpha.
+          npx capacitor-assets generate --ios \
+            --iconBackgroundColor '#17111F' \
+            --iconBackgroundColorDark '#17111F' \
+            --splashBackgroundColor '#17111F' \
+            --splashBackgroundColorDark '#17111F'
+
+      - name: Regler le projet iOS
+        working-directory: mobile
+        run: |
+          set -euo pipefail
+
+          # --- Cible de deploiement iOS 15.0 --------------------------------
+          # Capacitor genere 14.0 ; Apple avertit qu'a partir de 2027 le minimum
+          # sera 15.0. Deux endroits comptent : le Podfile et le projet Xcode.
+          export IOS_MIN=15.0
+          sed -i '' "s/platform :ios, '[0-9.]*'/platform :ios, '$IOS_MIN'/" ios/App/Podfile
+          ruby -rxcodeproj -e '
+            p = Xcodeproj::Project.open("ios/App/App.xcodeproj")
+            p.build_configurations.each { |c| c.build_settings["IPHONEOS_DEPLOYMENT_TARGET"] = ENV["IOS_MIN"] }
+            p.targets.each { |t| t.build_configurations.each { |c| c.build_settings["IPHONEOS_DEPLOYMENT_TARGET"] = ENV["IOS_MIN"] } }
+            p.save
+          '
+
+          # --- Ecran de lancement a la couleur du jeu, pas du blanc ----------
+          # Un blanc au demarrage est un motif de refus Apple (2.1). Le jeu ouvre
+          # sur un fond aubergine ; l'ecran de lancement doit l'etre aussi.
+          # #17111F = 23,17,31 sur 255 -> 0.09019608, 0.06666667, 0.12156863
+          STORYBOARD=ios/App/App/Base.lproj/LaunchScreen.storyboard
+          [ -f "$STORYBOARD" ] || { echo "::error::$STORYBOARD introuvable."; exit 1; }
+          N=$(perl -0pi -e '
+            our $n = 0;
+            $n += s|<color key="backgroundColor"[^/>]*/>|<color key="backgroundColor" red="0.09019608" green="0.06666667" blue="0.12156863" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>|g;
+            END { print STDERR $n }' "$STORYBOARD" 2>&1)
+          echo "ecran de lancement : $N couleur(s) remplacee(s)"
+          [ "$N" != "0" ] || { echo "::error::aucune couleur de fond remplacee dans le storyboard."; exit 1; }
+
+          # --- Numero de build strictement croissant ------------------------
+          # Capacitor ecrit CFBundleVersion=1 en dur et ne l'incremente jamais ;
+          # Apple refuse deux televersements au meme numero. GITHUB_RUN_NUMBER
+          # croit a chaque execution — exactement ce qu'il faut.
+          BN="${GITHUB_RUN_NUMBER}"
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BN" ios/App/App/Info.plist \
+            || /usr/libexec/PlistBuddy -c "Add :CFBundleVersion string $BN" ios/App/App/Info.plist
+          export BN
+          ruby -rxcodeproj -e '
+            p = Xcodeproj::Project.open("ios/App/App.xcodeproj")
+            p.targets.each { |t| t.build_configurations.each { |c| c.build_settings["CURRENT_PROJECT_VERSION"] = ENV["BN"] } }
+            p.save
+          '
+
+          # --- Version marketing depuis le fichier VERSION ------------------
+          MV="$(tr -d ' \t\r\n' < "$GITHUB_WORKSPACE/VERSION")"
+          [ -n "$MV" ] || { echo "::error::VERSION vide."; exit 1; }
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $MV" ios/App/App/Info.plist \
+            || /usr/libexec/PlistBuddy -c "Add :CFBundleShortVersionString string $MV" ios/App/App/Info.plist
+          export MV
+          ruby -rxcodeproj -e '
+            p = Xcodeproj::Project.open("ios/App/App.xcodeproj")
+            p.targets.each { |t| t.build_configurations.each { |c| c.build_settings["MARKETING_VERSION"] = ENV["MV"] } }
+            p.save
+          '
+          echo "version : $MV ($BN)"
+
+          # --- iPhone uniquement --------------------------------------------
+          # App Store Connect exige des captures iPad des qu'une app se declare
+          # universelle ; le jeu vise le telephone. "1" = iPhone.
+          ruby -rxcodeproj -e '
+            p = Xcodeproj::Project.open("ios/App/App.xcodeproj")
+            a = p.targets.find { |t| t.name == "App" }; abort("cible App introuvable") unless a
+            a.build_configurations.each { |c| c.build_settings["TARGETED_DEVICE_FAMILY"] = "1" }
+            p.save
+          '
+
+          # --- Conformite export : aucun chiffrement propre -----------------
+          # Le jeu ne chiffre rien (pas d'appel reseau). Le declarer evite le
+          # questionnaire de conformite a chaque televersement.
+          /usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" ios/App/App/Info.plist \
+            || /usr/libexec/PlistBuddy -c "Set :ITSAppUsesNonExemptEncryption false" ios/App/App/Info.plist
+
+          # --- Plein ecran ---------------------------------------------------
+          # Le jeu se joue plein cadre. Sans ces cles, la barre de statut
+          # apparait au lancement puis disparait, ce qui se voit.
+          /usr/libexec/PlistBuddy -c "Add :UIStatusBarHidden bool true" ios/App/App/Info.plist \
+            || /usr/libexec/PlistBuddy -c "Set :UIStatusBarHidden true" ios/App/App/Info.plist
+          /usr/libexec/PlistBuddy -c "Add :UIViewControllerBasedStatusBarAppearance bool false" ios/App/App/Info.plist \
+            || /usr/libexec/PlistBuddy -c "Set :UIViewControllerBasedStatusBarAppearance false" ios/App/App/Info.plist
+
+          npx cap sync ios
+
+      # --- MODE NON SIGNE : prouve que le projet compile -----------------
+      - name: Compiler sans signature
+        if: ${{ github.event.inputs.mode != 'testflight' }}
+        working-directory: mobile/ios/App
+        # Pas de pipe vers xcpretty : le code de sortie d'un pipeline est celui
+        # du DERNIER maillon, pas de xcodebuild — une CI qui ment est pire que
+        # pas de CI.
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -workspace App.xcworkspace -scheme App \
+            -configuration Debug -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath "$RUNNER_TEMP/DerivedData" \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+            build
+
+      # --- MODE TESTFLIGHT ------------------------------------------------
+      - name: Verifier les secrets
+        if: ${{ github.event.inputs.mode == 'testflight' }}
+        env:
+          CERT: ${{ secrets.APPLE_CERTIFICATE_P12 }}
+          CERT_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          PROFILE: ${{ secrets.APPLE_PROVISIONING_PROFILE }}
+          ISSUER: ${{ secrets.APPSTORE_ISSUER_ID }}
+          KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+          PRIVATE_KEY: ${{ secrets.APPSTORE_PRIVATE_KEY }}
+        run: |
+          missing=""
+          [ -z "$CERT" ]          && missing="$missing APPLE_CERTIFICATE_P12"
+          [ -z "$CERT_PASSWORD" ] && missing="$missing APPLE_CERTIFICATE_PASSWORD"
+          [ -z "$PROFILE" ]       && missing="$missing APPLE_PROVISIONING_PROFILE"
+          [ -z "$ISSUER" ]        && missing="$missing APPSTORE_ISSUER_ID"
+          [ -z "$KEY_ID" ]        && missing="$missing APPSTORE_KEY_ID"
+          [ -z "$PRIVATE_KEY" ]   && missing="$missing APPSTORE_PRIVATE_KEY"
+          [ -z "$missing" ] || { echo "::error::Secrets manquants :$missing"; exit 1; }
+
+      - name: Installer le certificat et le profil
+        if: ${{ github.event.inputs.mode == 'testflight' }}
+        env:
+          CERT_B64: ${{ secrets.APPLE_CERTIFICATE_P12 }}
+          CERT_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          PROFILE_B64: ${{ secrets.APPLE_PROVISIONING_PROFILE }}
+        run: |
+          set -euo pipefail
+          KEYCHAIN="$RUNNER_TEMP/build.keychain"
+          KEYCHAIN_PASS="$(openssl rand -base64 24)"
+          echo "$CERT_B64" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          echo "$PROFILE_B64" | base64 --decode > "$RUNNER_TEMP/profile.mobileprovision"
+          security create-keychain -p "$KEYCHAIN_PASS" "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASS" "$KEYCHAIN"
+          security import "$RUNNER_TEMP/cert.p12" -k "$KEYCHAIN" -P "$CERT_PASSWORD" -A -f pkcs12 \
+            -T /usr/bin/codesign -T /usr/bin/security
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASS" "$KEYCHAIN"
+          security list-keychains -d user -s "$KEYCHAIN" $(security list-keychains -d user | tr -d '"')
+
+          # Un .mobileprovision est un plist signe : il porte deja son UUID, son
+          # nom, l'equipe et le bundle. On les lit plutot que d'exiger d'autres
+          # secrets.
+          security cms -D -i "$RUNNER_TEMP/profile.mobileprovision" > "$RUNNER_TEMP/profile.plist"
+          PB=/usr/libexec/PlistBuddy
+          PROFILE_UUID="$($PB -c 'Print :UUID' "$RUNNER_TEMP/profile.plist")"
+          PROFILE_NAME="$($PB -c 'Print :Name' "$RUNNER_TEMP/profile.plist")"
+          TEAM_ID="$($PB -c 'Print :TeamIdentifier:0' "$RUNNER_TEMP/profile.plist")"
+          APP_ID="$($PB -c 'Print :Entitlements:application-identifier' "$RUNNER_TEMP/profile.plist")"
+          PROFILE_BUNDLE="${APP_ID#${TEAM_ID}.}"
+
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp "$RUNNER_TEMP/profile.mobileprovision" \
+             ~/Library/MobileDevice/Provisioning\ Profiles/"$PROFILE_UUID".mobileprovision
+
+          SIGNING_IDENTITY="$(security find-identity -v -p codesigning "$KEYCHAIN" | sed -n 's/.*"\(.*\)".*/\1/p' | head -1)"
+          [ -n "$SIGNING_IDENTITY" ] || { echo "::error::Aucune identite de signature. Le .p12 contient-il le certificat de DISTRIBUTION et sa cle privee ?"; exit 1; }
+
+          # Le profil doit couvrir le bon bundle : cause d'echec numero un.
+          EXPECTED_BUNDLE="$(sed -n 's/.*"appId"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' mobile/capacitor.config.json | head -1)"
+          echo "profil=$PROFILE_NAME uuid=$PROFILE_UUID equipe=$TEAM_ID"
+          echo "bundle : profil=$PROFILE_BUNDLE attendu=$EXPECTED_BUNDLE"
+          [ "$PROFILE_BUNDLE" = "$EXPECTED_BUNDLE" ] || { echo "::error::Le profil couvre '$PROFILE_BUNDLE' mais l'app est '$EXPECTED_BUNDLE'. Recreez le profil sur le bon App ID."; exit 1; }
+
+          {
+            echo "PROFILE_UUID=$PROFILE_UUID"
+            echo "PROFILE_NAME=$PROFILE_NAME"
+            echo "TEAM_ID=$TEAM_ID"
+            echo "SIGNING_IDENTITY=$SIGNING_IDENTITY"
+            echo "BUNDLE_ID=$EXPECTED_BUNDLE"
+          } >> "$GITHUB_ENV"
+          rm -f "$RUNNER_TEMP/cert.p12" "$RUNNER_TEMP/profile.plist"
+
+      - name: Archiver et exporter l'IPA
+        if: ${{ github.event.inputs.mode == 'testflight' }}
+        working-directory: mobile/ios/App
+        run: |
+          set -euo pipefail
+          cat > "$RUNNER_TEMP/export.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>uploadSymbols</key><true/>
+            <key>signingStyle</key><string>manual</string>
+            <key>teamID</key><string>${TEAM_ID}</string>
+            <key>provisioningProfiles</key>
+            <dict><key>${BUNDLE_ID}</key><string>${PROFILE_NAME}</string></dict>
+          </dict></plist>
+          PLIST
+
+          # La signature s'ecrit dans la SEULE cible App, via xcodeproj : passee
+          # en ligne de commande elle s'appliquerait aussi aux pods, qui la
+          # refusent (« does not support provisioning profiles »).
+          ruby -rxcodeproj -e '
+            p = Xcodeproj::Project.open("App.xcodeproj")
+            t = p.targets.find { |x| x.name == "App" }; abort("cible App introuvable") unless t
+            t.build_configurations.each do |c|
+              c.build_settings["CODE_SIGN_STYLE"]                = "Manual"
+              c.build_settings["DEVELOPMENT_TEAM"]               = ENV["TEAM_ID"]
+              c.build_settings["PROVISIONING_PROFILE_SPECIFIER"] = ENV["PROFILE_NAME"]
+              c.build_settings["CODE_SIGN_IDENTITY"]             = ENV["SIGNING_IDENTITY"]
+            end
+            p.save
+          '
+
+          xcodebuild -workspace App.xcworkspace -scheme App \
+            -configuration Release -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/App.xcarchive" archive
+
+          xcodebuild -exportArchive \
+            -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/export.plist" \
+            -exportPath "$RUNNER_TEMP/export"
+
+      - name: Televerser sur TestFlight
+        if: ${{ github.event.inputs.mode == 'testflight' }}
+        env:
+          ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+          KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+          PRIVATE_KEY: ${{ secrets.APPSTORE_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/private_keys
+          echo "$PRIVATE_KEY" > ~/private_keys/AuthKey_$KEY_ID.p8
+          IPA="$(find "$RUNNER_TEMP/export" -name '*.ipa' | head -1)"
+          echo "IPA : $IPA"
+          xcrun altool --upload-app -f "$IPA" -t ios --apiKey "$KEY_ID" --apiIssuer "$ISSUER_ID"
+          rm -f ~/private_keys/AuthKey_$KEY_ID.p8
+
+      - name: Conserver l'IPA
+        if: ${{ github.event.inputs.mode == 'testflight' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: tapnostress-ios-ipa
+          path: ${{ runner.temp }}/export/*.ipa
+          retention-days: 14
+
+      - name: Nettoyer
+        if: ${{ always() && github.event.inputs.mode == 'testflight' }}
+        run: |
+          security delete-keychain "$RUNNER_TEMP/build.keychain" 2>/dev/null || true
+          rm -rf ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision || true
