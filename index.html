@@ -78,7 +78,7 @@
 }
 .gearbtn:hover{color:var(--cream);opacity:1}
 .gearbtn svg{width:23px;height:23px}
-#s-home{display:flex;flex-direction:column;align-items:center;min-height:min(74vh,640px)}
+#s-home.on{display:flex;flex-direction:column;align-items:center;min-height:min(74vh,640px)}
 #s-home .brand{margin-top:2.5vh;margin-bottom:0}
 .mascot{width:74px;height:74px;margin:0 auto 15px}
 .mascot svg{width:100%;height:100%;display:block;filter:drop-shadow(0 10px 22px var(--mascot-glow))}
@@ -920,36 +920,37 @@ const Decor = (() => {
   function vignette() {
     const g = ctx.createRadialGradient(W / 2, H * .46, Math.min(W, H) * .28, W / 2, H * .5, Math.max(W, H) * .78);
     g.addColorStop(0, "rgba(0,0,0,0)");
-    g.addColorStop(1, isDay() ? "rgba(120,96,140,.16)" : "rgba(6,3,11,.72)");
+    g.addColorStop(1, isDay() ? "rgba(126,104,146,.09)" : "rgba(6,3,11,.72)");
     ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
   }
 
   /* — Foire Nocturne : lampions flous, poussière d'or — */
   function foire(T, e) {
     const g = ctx.createLinearGradient(0, 0, W * .3, H);
-    if (isDay()) { g.addColorStop(0, "#FFE3CC"); g.addColorStop(.55, "#F7D6E6"); g.addColorStop(1, "#E4DAF6"); }
+    if (isDay()) { g.addColorStop(0, "#FBEEE6"); g.addColorStop(.55, "#F6E7EF"); g.addColorStop(1, "#EDE7F4"); }
     else { g.addColorStop(0, "#241634"); g.addColorStop(.55, "#1A1026"); g.addColorStop(1, "#0E0917"); }
     ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
 
     const warm = ["#FF7A4D", "#FF4D8D", "#FFB03A", "#8A5CFF", "#FF5E7A"];
+    const dm = isDay() ? .42 : 1;   // en journée, halos laiteux et discrets
     ctx.globalCompositeOperation = "lighter";
     far.forEach((b, i) => {
       const x = ((b.x + T * b.s * .3) % 1.3 - .15) * W - px * 16;
       const y = b.y * H + Math.sin(T * .22 + b.p) * 24 - py * 12;
       const r = b.r * Math.min(W, H) * (1 + e * .08);
-      blob(x, y, r, hexA(warm[i % warm.length], .13 + e * .05), hexA(warm[i % warm.length], .045));
+      blob(x, y, r, hexA(warm[i % warm.length], (.13 + e * .05) * dm), hexA(warm[i % warm.length], .045 * dm));
     });
     mid.forEach((b, i) => {
       const x = ((b.x + T * b.s * .55) % 1.2 - .1) * W - px * 40;
       const y = ((b.y + Math.sin(T * .3 + b.p) * .015) % 1) * H - py * 28;
       const r = b.r * Math.min(W, H);
-      blob(x, y, r, hexA(warm[(i + 2) % warm.length], .2), hexA(warm[(i + 2) % warm.length], .06));
+      blob(x, y, r, hexA(warm[(i + 2) % warm.length], .2 * dm), hexA(warm[(i + 2) % warm.length], .06 * dm));
     });
     near.forEach(b => {
       const x = ((b.x + T * b.s * .12) % 1) * W - px * 78;
       const y = ((b.y - T * b.s * .05 + 1) % 1) * H - py * 60;
       const a = .3 + .5 * (.5 + .5 * Math.sin(T * 2 + b.p));
-      ctx.fillStyle = hexA("#FFD75E", a * .55);
+      ctx.fillStyle = hexA("#FFD75E", a * .55 * dm);
       ctx.beginPath(); ctx.arc(x, y, b.r, 0, 6.2832); ctx.fill();
     });
     ctx.globalCompositeOperation = "source-over";
@@ -958,7 +959,7 @@ const Decor = (() => {
   /* — Aurore Boréale : voiles polaires, étoiles, crêtes — */
   function aurore(T, e) {
     const g = ctx.createLinearGradient(0, 0, 0, H);
-    if (isDay()) { g.addColorStop(0, "#CFE2FB"); g.addColorStop(.5, "#E3E8FA"); g.addColorStop(1, "#EFE7F4"); }
+    if (isDay()) { g.addColorStop(0, "#E4EDF7"); g.addColorStop(.5, "#EDEFF6"); g.addColorStop(1, "#F3ECF2"); }
     else { g.addColorStop(0, "#050B1E"); g.addColorStop(.5, "#0A1430"); g.addColorStop(1, "#101A3A"); }
     ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
 
@@ -990,7 +991,7 @@ const Decor = (() => {
     ctx.globalCompositeOperation = "source-over";
 
     hills.forEach((h, i) => {
-      ctx.fillStyle = (isDay() ? ["#A7BCDE", "#93A9CE", "#8296BE"] : ["#0A1128", "#070D1F", "#050916"])[i];
+      ctx.fillStyle = (isDay() ? ["#C6D3E6", "#BAC8DF", "#AEBCD6"] : ["#0A1128", "#070D1F", "#050916"])[i];
       ctx.beginPath(); ctx.moveTo(-10, H);
       for (let x = -10; x <= W + 10; x += 22) {
         const y = H * (1 - h.h) + Math.sin((x + h.o) / (90 - i * 18)) * (16 + i * 9)
@@ -1005,7 +1006,7 @@ const Decor = (() => {
   function couchant(T, e) {
     const hz = H * .62;
     const g = ctx.createLinearGradient(0, 0, 0, hz);
-    if (isDay()) { g.addColorStop(0, "#8CC0EC"); g.addColorStop(.45, "#E7AAC9"); g.addColorStop(.82, "#FFC38A"); g.addColorStop(1, "#FFE3AC"); }
+    if (isDay()) { g.addColorStop(0, "#BFD8EC"); g.addColorStop(.45, "#EAD0DE"); g.addColorStop(.82, "#F7DCC7"); g.addColorStop(1, "#F8ECD8"); }
     else { g.addColorStop(0, "#25123F"); g.addColorStop(.45, "#7A1E63"); g.addColorStop(.82, "#D9453F"); g.addColorStop(1, "#FF8A3D"); }
     ctx.fillStyle = g; ctx.fillRect(0, 0, W, hz);
 
@@ -1036,7 +1037,7 @@ const Decor = (() => {
 
     // sol
     const fg = ctx.createLinearGradient(0, hz, 0, H);
-    if (isDay()) { fg.addColorStop(0, "#C7A8DC"); fg.addColorStop(1, "#E7D8EE"); }
+    if (isDay()) { fg.addColorStop(0, "#D9C9E4"); fg.addColorStop(1, "#EEE6F1"); }
     else { fg.addColorStop(0, "#1B0A2E"); fg.addColorStop(1, "#08040F"); }
     ctx.fillStyle = fg; ctx.fillRect(0, hz, W, H - hz);
 
