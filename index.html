@@ -903,16 +903,19 @@ const Decor = (() => {
     ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fill();
   }
 
+  const isDay = () => effTheme() === "aube";
   function vignette() {
     const g = ctx.createRadialGradient(W / 2, H * .46, Math.min(W, H) * .28, W / 2, H * .5, Math.max(W, H) * .78);
-    g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(6,3,11,.72)");
+    g.addColorStop(0, "rgba(0,0,0,0)");
+    g.addColorStop(1, isDay() ? "rgba(120,96,140,.16)" : "rgba(6,3,11,.72)");
     ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
   }
 
   /* — Foire Nocturne : lampions flous, poussière d'or — */
   function foire(T, e) {
     const g = ctx.createLinearGradient(0, 0, W * .3, H);
-    g.addColorStop(0, "#241634"); g.addColorStop(.55, "#1A1026"); g.addColorStop(1, "#0E0917");
+    if (isDay()) { g.addColorStop(0, "#FFE3CC"); g.addColorStop(.55, "#F7D6E6"); g.addColorStop(1, "#E4DAF6"); }
+    else { g.addColorStop(0, "#241634"); g.addColorStop(.55, "#1A1026"); g.addColorStop(1, "#0E0917"); }
     ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
 
     const warm = ["#FF7A4D", "#FF4D8D", "#FFB03A", "#8A5CFF", "#FF5E7A"];
@@ -942,10 +945,11 @@ const Decor = (() => {
   /* — Aurore Boréale : voiles polaires, étoiles, crêtes — */
   function aurore(T, e) {
     const g = ctx.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, "#050B1E"); g.addColorStop(.5, "#0A1430"); g.addColorStop(1, "#101A3A");
+    if (isDay()) { g.addColorStop(0, "#CFE2FB"); g.addColorStop(.5, "#E3E8FA"); g.addColorStop(1, "#EFE7F4"); }
+    else { g.addColorStop(0, "#050B1E"); g.addColorStop(.5, "#0A1430"); g.addColorStop(1, "#101A3A"); }
     ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
 
-    stars.forEach(s => {
+    if (!isDay()) stars.forEach(s => {
       const a = .25 + .6 * Math.abs(Math.sin(T * s.sp + s.p));
       ctx.fillStyle = `rgba(226,238,255,${a})`;
       ctx.beginPath(); ctx.arc(s.x * W - px * 8, s.y * H - py * 6, s.r, 0, 6.2832); ctx.fill();
@@ -973,7 +977,7 @@ const Decor = (() => {
     ctx.globalCompositeOperation = "source-over";
 
     hills.forEach((h, i) => {
-      ctx.fillStyle = ["#0A1128", "#070D1F", "#050916"][i];
+      ctx.fillStyle = (isDay() ? ["#A7BCDE", "#93A9CE", "#8296BE"] : ["#0A1128", "#070D1F", "#050916"])[i];
       ctx.beginPath(); ctx.moveTo(-10, H);
       for (let x = -10; x <= W + 10; x += 22) {
         const y = H * (1 - h.h) + Math.sin((x + h.o) / (90 - i * 18)) * (16 + i * 9)
@@ -988,7 +992,8 @@ const Decor = (() => {
   function couchant(T, e) {
     const hz = H * .62;
     const g = ctx.createLinearGradient(0, 0, 0, hz);
-    g.addColorStop(0, "#25123F"); g.addColorStop(.45, "#7A1E63"); g.addColorStop(.82, "#D9453F"); g.addColorStop(1, "#FF8A3D");
+    if (isDay()) { g.addColorStop(0, "#8CC0EC"); g.addColorStop(.45, "#E7AAC9"); g.addColorStop(.82, "#FFC38A"); g.addColorStop(1, "#FFE3AC"); }
+    else { g.addColorStop(0, "#25123F"); g.addColorStop(.45, "#7A1E63"); g.addColorStop(.82, "#D9453F"); g.addColorStop(1, "#FF8A3D"); }
     ctx.fillStyle = g; ctx.fillRect(0, 0, W, hz);
 
     // nuages lointains, très diffus
@@ -1018,7 +1023,8 @@ const Decor = (() => {
 
     // sol
     const fg = ctx.createLinearGradient(0, hz, 0, H);
-    fg.addColorStop(0, "#1B0A2E"); fg.addColorStop(1, "#08040F");
+    if (isDay()) { fg.addColorStop(0, "#C7A8DC"); fg.addColorStop(1, "#E7D8EE"); }
+    else { fg.addColorStop(0, "#1B0A2E"); fg.addColorStop(1, "#08040F"); }
     ctx.fillStyle = fg; ctx.fillRect(0, hz, W, H - hz);
 
     // grille en fuite : les lignes proches sont nettes, les lointaines s'effacent
