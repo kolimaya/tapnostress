@@ -189,7 +189,7 @@ canvas,svg,img{-webkit-user-drag:none;user-drag:none}
   opacity:0;transform:translateY(-10px);transition:opacity .35s ease,transform .35s ease;
 }
 #hud.on{opacity:1;transform:none}
-.hud-col-r{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.hud-col-r{position:relative;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
 
 .score-wrap{position:relative;display:flex;flex-direction:column;gap:7px;min-width:0}
 .score{
@@ -278,7 +278,7 @@ canvas,svg,img{-webkit-user-drag:none;user-drag:none}
 .chip.time:active{transform:scale(.96)}
 .chip.time.low{color:var(--coral);animation:lowpulse .8s ease-in-out infinite}
 @keyframes lowpulse{0%,100%{opacity:1}50%{opacity:.45}}
-.chip.combo{color:var(--gold);box-shadow:inset 0 0 0 1px rgba(255,215,94,.4)}
+.chip.combo{position:absolute;top:calc(100% + 7px);right:0;color:var(--gold);box-shadow:inset 0 0 0 1px rgba(255,215,94,.4)}
 .chip.lvl{color:var(--amber)}
 .icon-btn{
   pointer-events:auto;width:38px;height:38px;flex:none;border:0;cursor:pointer;
@@ -483,6 +483,23 @@ h2.title{
 }
 @keyframes cnt{0%{opacity:0;transform:scale(2.2)}30%{opacity:1;transform:scale(1)}75%{opacity:1}100%{opacity:0;transform:scale(.82)}}
 
+/* voile de fin — adoucit le passage du jeu à l'écran de score */
+#endfade{
+  position:absolute;inset:0;z-index:8;display:grid;place-items:center;pointer-events:none;
+  opacity:0;transition:opacity .6s ease;
+  background:radial-gradient(125% 92% at 50% 42%, rgba(10,6,16,0), rgba(8,5,14,.62));
+}
+#endfade.on{opacity:1}
+#endfade span{
+  font-family:var(--f-display);font-size:clamp(24px,6vw,40px);color:var(--gold);
+  letter-spacing:.03em;text-shadow:0 6px 30px rgba(0,0,0,.5);
+  transform:translateY(10px) scale(.96);opacity:0;
+  transition:transform .55s cubic-bezier(.2,1,.3,1) .05s,opacity .55s ease .05s;
+}
+#endfade.on span{transform:none;opacity:1}
+:root[data-theme="aube"] #endfade{background:radial-gradient(125% 92% at 50% 42%, rgba(255,255,255,0), rgba(235,223,238,.66))}
+:root[data-theme="aube"] #endfade span{color:var(--amber);text-shadow:0 6px 24px rgba(120,90,140,.3)}
+
 .foot{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:18px;flex-wrap:wrap}
 .foot button{
   background:none;border:0;cursor:pointer;color:var(--muted);font-family:var(--f-body);
@@ -543,6 +560,8 @@ h2.title{
   </header>
 
   <div id="count"><b>3</b></div>
+
+  <div id="endfade"><span>Temps écoulé</span></div>
 
   <div id="veil">
     <!-- HOME -->
@@ -1345,6 +1364,7 @@ function frame(now) {
   gt += dt;
   if (S.phase === "play") update(dt);
   else if (S.phase === "count" && now >= S.countUntil) beginPlay();
+  else if (S.phase === "ending") { S.endT += dt; if (S.endT >= 950) endGame(); }
   render(dt);
   requestAnimationFrame(frame);
 }
@@ -1407,7 +1427,19 @@ function update(dt) {
   S.flash *= Math.pow(.87, dt / 16);
 
   updateHUD();
-  if (S.timeLeft <= 0) endGame();
+  if (S.timeLeft <= 0) timeUp();
+}
+
+/* Échéance : on ne coupe pas sec. Une courte transition (scène figée, HUD qui
+   s'estompe, voile « Temps écoulé » qui monte) précède l'écran de score. */
+function timeUp() {
+  if (S.phase !== "play") return;
+  S.phase = "ending"; S.endT = 0; S.timeLeft = 0;
+  updateHUD();
+  $("hud").classList.remove("on");
+  $("timebar").classList.remove("on");
+  $("endfade").classList.add("on");
+  Sound.over();
 }
 
 /* — interaction — */
@@ -1747,10 +1779,11 @@ function startGame(mode) {
   S.timeLeft = MODES[mode].time * 1000; S.elapsed = 0;
   S.spawnAcc = 0; S.bonusAcc = 0; S.ruleAcc = 0;
   S.hits = 0; S.taps = 0; S.misses = 0;
-  S.beaten = false; S.shake = 0; S.flash = 0; S.energy = 0;
+  S.beaten = false; S.shake = 0; S.flash = 0; S.energy = 0; S.endT = 0;
   shapes = []; parts = []; pops = []; rings = []; texts = []; ripples = [];
   S.rule = makeRule();
 
+  $("endfade").classList.remove("on");
   $("rail").classList.remove("beaten");
   renderRule();
   measureBounds();
@@ -1799,6 +1832,7 @@ function resumeGame() {
 
 function endGame() {
   S.phase = "over";
+  $("endfade").classList.remove("on");
   $("hud").classList.remove("on");
   $("timebar").classList.remove("on");
   shapes = [];
@@ -1826,7 +1860,7 @@ function endGame() {
   ].map(([v, l]) => `<div class="stat"><b>${v}</b><span>${l}</span></div>`).join("");
   $("finalCoins").textContent = "+" + fmt(coins) + " éclats";
 
-  isRecord ? Sound.record() : Sound.over();
+  if (isRecord) Sound.record();   // le son « temps écoulé » a déjà sonné à l'échéance
   showVeil("s-over");
 }
 
