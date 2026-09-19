@@ -32,7 +32,96 @@
   --f-display:"Bungee","Arial Black",system-ui,sans-serif;
   --f-body:"Nunito","Segoe UI",system-ui,sans-serif;
   --f-data:"Chakra Petch","Nunito",system-ui,sans-serif;
+  --wave-col:rgba(255,215,94,.42);
 }
+
+/* ===== Thème AUBE (clair) : surcharge des jetons + surfaces codées en dur ===== */
+:root[data-theme="aube"]{
+  --ground:#ECE2F0; --ground-2:#F5ECF1; --panel:#FFFFFF; --panel-2:#FBF2FA;
+  --line:#E6D6E7; --cream:#4A3F57; --cream-dim:#6D6076; --muted:#948699;
+  --amber:#E68636; --coral:#FF6F94; --gold:#D98A22; --teal:#2FA594; --danger:#E0435A;
+  --wave-col:rgba(255,126,168,.5);
+}
+:root[data-theme="aube"] #app,:root[data-theme="aube"] body{background:var(--ground)}
+:root[data-theme="aube"] #veil{
+  background:radial-gradient(125% 92% at 50% 0%, #FBD9E6 0%, #E9DEF7 46%, #DCEBFC 100%);
+  backdrop-filter:blur(14px) saturate(1.05);
+}
+:root[data-theme="aube"] .card{
+  background:linear-gradient(165deg,rgba(255,255,255,.86),rgba(255,247,252,.8));
+  box-shadow:inset 0 0 0 1px rgba(120,90,130,.14),0 22px 48px rgba(120,90,140,.16);
+}
+:root[data-theme="aube"] .btn.ghost{background:rgba(255,255,255,.62);box-shadow:inset 0 0 0 1px var(--line)}
+:root[data-theme="aube"] .mode{background:rgba(255,255,255,.64);box-shadow:inset 0 0 0 1px var(--line)}
+:root[data-theme="aube"] .mode:hover{background:rgba(255,255,255,.9)}
+:root[data-theme="aube"] .rule{background:rgba(255,255,255,.82)}
+:root[data-theme="aube"] .chip,:root[data-theme="aube"] .icon-btn{background:rgba(255,255,255,.78)}
+:root[data-theme="aube"] .hint{background:rgba(47,165,148,.12)}
+:root[data-theme="aube"] .stat{background:rgba(255,255,255,.6)}
+:root[data-theme="aube"] .wallet{background:linear-gradient(120deg,rgba(230,134,54,.16),rgba(255,111,148,.12))}
+:root[data-theme="aube"] .rail-track{background:rgba(90,70,100,.12);box-shadow:inset 0 0 0 1px rgba(90,70,100,.12)}
+:root[data-theme="aube"] .brand h1{
+  background:linear-gradient(175deg,#C86A8E 6%,var(--gold) 55%,var(--coral) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 8px 22px rgba(255,140,120,.26));
+}
+
+/* ===== Accueil épuré : roue crantée + bouton Jouer à ondes d'eau ===== */
+.gearbtn{
+  position:absolute;top:calc(12px + env(safe-area-inset-top));right:calc(16px + env(safe-area-inset-right));
+  width:42px;height:42px;border:0;background:none;cursor:pointer;color:var(--muted);
+  display:grid;place-items:center;opacity:.82;z-index:2;transition:color .15s ease,opacity .15s ease;
+}
+.gearbtn:hover{color:var(--cream);opacity:1}
+.gearbtn svg{width:23px;height:23px}
+.playzone{position:relative;display:grid;place-items:center;width:210px;height:210px;margin:6px auto 0}
+.wave{
+  position:absolute;width:150px;height:150px;border-radius:50%;
+  background:radial-gradient(circle, transparent 54%, var(--wave-col) 65%, transparent 80%);
+  filter:blur(1.6px);animation:hwave 6.8s ease-out infinite;pointer-events:none;
+}
+.wave:nth-child(2){animation-delay:2.27s}
+.wave:nth-child(3){animation-delay:4.53s}
+.play-orb{
+  position:relative;width:150px;height:150px;border-radius:50%;border:0;cursor:pointer;
+  display:grid;place-items:center;font-family:var(--f-display);font-size:23px;letter-spacing:.02em;
+  color:#2A1608;background:linear-gradient(150deg,var(--gold),var(--amber));
+  box-shadow:0 14px 34px rgba(255,158,61,.42),inset 0 2px 12px rgba(255,255,255,.4);
+  animation:hbreathe 5s ease-in-out infinite;transition:transform .12s ease;
+}
+.play-orb:active{transform:scale(.95)}
+@keyframes hwave{0%{transform:scale(.6);opacity:0}15%{opacity:.6}100%{transform:scale(2.15);opacity:0}}
+@keyframes hbreathe{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+
+/* ===== Réglages ===== */
+.themepick{padding:14px;border-radius:var(--r-m);margin-bottom:11px;
+  background:rgba(46,33,64,.62);box-shadow:inset 0 0 0 1px var(--line)}
+:root[data-theme="aube"] .themepick{background:rgba(255,255,255,.64)}
+.themepick .lb{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:800;margin-bottom:9px}
+.segs{display:flex;gap:5px;padding:4px;border-radius:12px;background:rgba(0,0,0,.2)}
+:root[data-theme="aube"] .segs{background:rgba(90,70,100,.1)}
+.seg{flex:1;border:0;cursor:pointer;font-family:var(--f-body);font-weight:800;font-size:12.5px;
+  padding:9px 4px;border-radius:9px;color:var(--muted);background:none;transition:color .15s,background .15s;white-space:nowrap}
+.seg.on{color:var(--cream);background:var(--panel-2);box-shadow:0 2px 8px rgba(0,0,0,.22)}
+:root[data-theme="aube"] .seg.on{background:#fff;box-shadow:0 2px 8px rgba(120,90,140,.18)}
+.setlist{display:flex;flex-direction:column;gap:10px}
+.setrow{display:flex;align-items:center;gap:13px;width:100%;text-align:left;border:0;cursor:pointer;
+  padding:14px;border-radius:var(--r-m);color:var(--cream);font-family:var(--f-body);
+  background:rgba(46,33,64,.62);box-shadow:inset 0 0 0 1px var(--line);transition:box-shadow .13s ease}
+:root[data-theme="aube"] .setrow{background:rgba(255,255,255,.62)}
+.setrow:hover{box-shadow:inset 0 0 0 1px var(--amber)}
+.setrow .ic{width:34px;height:34px;border-radius:11px;flex:none;display:grid;place-items:center;font-size:15px;
+  background:color-mix(in srgb,var(--amber) 20%,transparent);color:var(--amber)}
+.setrow .tx{flex:1;min-width:0}
+.setrow .tx b{display:block;font-weight:800;font-size:14.5px}
+.setrow .tx span{display:block;font-size:11.5px;color:var(--muted)}
+.setrow .chev{color:var(--muted);font-size:18px;flex:none}
+.switch{width:44px;height:26px;border-radius:99px;flex:none;position:relative;background:var(--line);transition:background .15s}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;
+  background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:left .15s}
+.switch.on{background:var(--teal)}
+.switch.on::after{left:21px}
+
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;padding:0}
 html{
@@ -419,22 +508,38 @@ h2.title{
   <div id="veil">
     <!-- HOME -->
     <section class="screen on" id="s-home">
+      <button class="gearbtn" id="goSettings" aria-label="Réglages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3.1"/><path d="M12 2.6v3M12 18.4v3M2.6 12h3M18.4 12h3M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M18.8 5.2l-2.1 2.1M7.3 16.7l-2.1 2.1"/></svg></button>
       <div class="brand">
         <h1><span>TAP</span> <span>NO STRESS</span></h1>
-        <p>Formes · Couleurs · Réflexes</p>
+        <p>Tape juste · Respire</p>
       </div>
-      <div class="card">
-        <button class="btn" id="goPlay">JOUER</button>
-        <div class="btn-row">
-          <button class="btn ghost" id="goShop">Boutique</button>
-          <button class="btn ghost" id="goHow">Règles</button>
-        </div>
-        <div class="foot">
-          <button id="toggleSound">🔊 Son activé</button>
-          <span class="dot"></span>
-          <button id="wipe">Réinitialiser</button>
+      <div class="playzone">
+        <span class="wave"></span><span class="wave"></span><span class="wave"></span>
+        <button class="play-orb" id="goPlay">JOUER</button>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="screen" id="s-settings">
+      <h2 class="title">Réglages</h2>
+      <p class="sub">Thème, son et tout le reste.</p>
+      <div class="themepick">
+        <div class="lb">Thème</div>
+        <div class="segs" id="themeSegs">
+          <button class="seg" data-theme-opt="aube">☀ Aube</button>
+          <button class="seg" data-theme-opt="crepuscule">☾ Crépuscule</button>
+          <button class="seg" data-theme-opt="auto">Auto</button>
         </div>
       </div>
+      <div class="setlist">
+        <button class="setrow" id="setSound"><span class="ic">♪</span><span class="tx"><b>Son</b><span>Effets &amp; ambiance</span></span><span class="switch" id="swSound"></span></button>
+        <button class="setrow" id="setHaptics"><span class="ic">≋</span><span class="tx"><b>Vibrations</b><span>Retour haptique</span></span><span class="switch" id="swHaptics"></span></button>
+        <button class="setrow" id="setShop"><span class="ic">◈</span><span class="tx"><b>Boutique</b><span>Formes &amp; décors</span></span><span class="chev">›</span></button>
+        <button class="setrow" id="setModes"><span class="ic">★</span><span class="tx"><b>Meilleurs scores</b><span>Suivis par mode</span></span><span class="chev">›</span></button>
+        <button class="setrow" id="setHow"><span class="ic">?</span><span class="tx"><b>Comment jouer</b></span><span class="chev">›</span></button>
+        <button class="setrow" id="setWipe"><span class="ic">⟲</span><span class="tx"><b>Réinitialiser</b><span>Efface records, éclats &amp; achats</span></span><span class="chev">›</span></button>
+      </div>
+      <button class="btn ghost" data-back="s-home" style="margin-top:14px">← Retour</button>
     </section>
 
     <!-- MODES -->
@@ -531,6 +636,7 @@ const hpt = (() => {
     try { H = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics || null; } catch (e) { H = null; }
   };
   return (kind) => {
+    if (typeof save !== "undefined" && save.haptics === false) return;
     boot(); if (!H) return;
     try {
       if (kind === "hit") H.impact({ style: "LIGHT" });
@@ -618,7 +724,7 @@ const KEY = "tapnostress.v1";
 // survivent au renommage. Elles ne sont jamais effacées.
 const LEGACY_KEYS = ["zolka.v1", "eclat.arcade.v1"];
 const DEFAULT_SAVE = {
-  coins: 250, sound: true, seen: true,
+  coins: 250, sound: true, haptics: true, theme: "auto", seen: true,
   best: { zen: 0, stress: 0, maitrise: 0, classic: 0 },
   owned: { shapes: ["classique"], decors: ["foire"] },
   equip: { shapes: "classique", decors: "foire" }
@@ -635,6 +741,8 @@ function load() {
     return {
       coins: Number(s.coins) || 0,
       sound: s.sound !== false,
+      haptics: s.haptics !== false,
+      theme: ["auto", "aube", "crepuscule"].includes(s.theme) ? s.theme : "auto",
       seen: true,
       best: Object.assign(d.best, s.best || {}),
       owned: {
@@ -1689,6 +1797,27 @@ function showVeil(id) {
 }
 function hideVeil() { $("veil").hidden = true; }
 
+/* Thème : deux ambiances (aube clair / crépuscule sombre), ou Auto selon l'heure
+   (clair 7 h–19 h, sombre sinon). Appliqué via data-theme sur <html>. */
+function effTheme() {
+  if (save.theme === "aube" || save.theme === "crepuscule") return save.theme;
+  const h = new Date().getHours();
+  return (h >= 7 && h < 19) ? "aube" : "crepuscule";
+}
+function applyTheme() {
+  const t = effTheme();
+  document.documentElement.dataset.theme = t;
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.content = t === "aube" ? "#F3DCEA" : "#17111F";
+  document.querySelectorAll("#themeSegs .seg")
+    .forEach(b => b.classList.toggle("on", b.dataset.themeOpt === save.theme));
+}
+function syncSettings() {
+  $("swSound").classList.toggle("on", save.sound);
+  $("swHaptics").classList.toggle("on", save.haptics !== false);
+  applyTheme();
+}
+
 function buildModes() {
   $("modeList").innerHTML = Object.entries(MODES).map(([k, m]) => {
     const b = save.best[k];
@@ -1845,8 +1974,7 @@ addEventListener("blur", () => { if (S.phase === "play") pauseGame(); });
 
 $("btnPause").addEventListener("click", () => { Sound.ui(); pauseGame(); });
 $("goPlay").addEventListener("click", () => { Sound.ui(); buildModes(); showVeil("s-modes"); });
-$("goShop").addEventListener("click", () => { Sound.ui(); buildShop(); showVeil("s-shop"); });
-$("goHow").addEventListener("click", () => { Sound.ui(); showVeil("s-how"); });
+$("goSettings").addEventListener("click", () => { Sound.ui(); syncSettings(); showVeil("s-settings"); });
 $("resume").addEventListener("click", () => { Sound.ui(); resumeGame(); });
 $("restart").addEventListener("click", () => { Sound.ui(); startGame(S.mode); });
 $("quit").addEventListener("click", () => {
@@ -1860,16 +1988,16 @@ $("overShop").addEventListener("click", () => { Sound.ui(); buildShop(); showVei
 document.querySelectorAll("[data-back]").forEach(b =>
   b.addEventListener("click", () => { Sound.ui(); showVeil(b.dataset.back); }));
 
-$("toggleSound").addEventListener("click", e => {
-  save.sound = !save.sound; persist();
-  e.currentTarget.textContent = save.sound ? "🔊 Son activé" : "🔇 Son coupé";
-  if (save.sound) Sound.ui();
+$("setSound").addEventListener("click", () => { save.sound = !save.sound; persist(); syncSettings(); if (save.sound) Sound.ui(); });
+$("setHaptics").addEventListener("click", () => { save.haptics = save.haptics === false; persist(); syncSettings(); if (save.haptics) hpt("hit"); });
+$("setShop").addEventListener("click", () => { Sound.ui(); buildShop(); showVeil("s-shop"); });
+$("setModes").addEventListener("click", () => { Sound.ui(); buildModes(); showVeil("s-modes"); });
+$("setHow").addEventListener("click", () => { Sound.ui(); showVeil("s-how"); });
+$("setWipe").addEventListener("click", () => {
+  save = structuredClone(DEFAULT_SAVE); persist(); applyTheme(); syncSettings(); Sound.ui(); showVeil("s-home");
 });
-$("wipe").addEventListener("click", () => {
-  save = structuredClone(DEFAULT_SAVE); persist();
-  $("toggleSound").textContent = "🔊 Son activé";
-  Sound.ui(); showVeil("s-home");
-});
+document.querySelectorAll("#themeSegs .seg").forEach(b =>
+  b.addEventListener("click", () => { save.theme = b.dataset.themeOpt; persist(); applyTheme(); Sound.ui(); }));
 
 addEventListener("keydown", e => {
   if (e.key === "Escape") { S.phase === "play" ? pauseGame() : (S.phase === "pause" && resumeGame()); }
@@ -1882,7 +2010,7 @@ if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
   addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 }
 
-$("toggleSound").textContent = save.sound ? "🔊 Son activé" : "🔇 Son coupé";
+applyTheme();
 S.mode = "zen";
 resize();
 new ResizeObserver(resize).observe(document.getElementById("app"));
