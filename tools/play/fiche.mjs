@@ -106,8 +106,15 @@ try {
   }
 
   if (APPLIQUER) {
-    await appel(jeton, base + ':commit', { method: 'POST' });
-    console.log('édition validée ✓  — visible sur Play sous ~1 h.');
+    // changesNotSentForReview=true : on VALIDE l'édition sans l'envoyer en revue.
+    // Deux raisons. D'abord la philosophie de l'outil — préparer la fiche, pas la
+    // soumettre. Ensuite, une NÉCESSITÉ pour une appli sans piste de production :
+    // Google refuse alors d'« envoyer en revue » (le commit nu renvoie un 403
+    // « The caller does not have permission » trompeur, alors que les droits sont
+    // là — c'est l'état de l'appli, pas la permission). Les changements sont posés
+    // et partiront en revue avec la première publication en production.
+    await appel(jeton, base + ':commit?changesNotSentForReview=true', { method: 'POST' });
+    console.log('édition validée ✓  (changements posés, non envoyés en revue) — visible sur Play sous ~1 h.');
   } else {
     await appel(jeton, base, { method: 'DELETE' });
     console.log('constat terminé — édition annulée (rien écrit).');
