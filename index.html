@@ -202,11 +202,11 @@ canvas,svg,img{-webkit-user-drag:none;user-drag:none}
 
 /* the record rail — always-on objective */
 .rail{
-  position:relative;width:min(46vw,260px);height:26px;
+  position:relative;width:min(38vw,168px);height:13px;
   display:flex;align-items:center;
 }
 .rail-track{
-  position:absolute;left:0;right:0;top:9px;height:8px;border-radius:99px;
+  position:absolute;left:0;right:0;top:4px;height:5px;border-radius:99px;
   background:rgba(255,243,226,.10);
   box-shadow:inset 0 0 0 1px rgba(255,243,226,.10);
   overflow:hidden;
@@ -218,11 +218,11 @@ canvas,svg,img{-webkit-user-drag:none;user-drag:none}
   transition:width .28s cubic-bezier(.3,1,.4,1);
 }
 .rail-goal{
-  position:absolute;right:-1px;top:2px;width:3px;height:22px;border-radius:2px;
+  position:absolute;right:-1px;top:1px;width:3px;height:11px;border-radius:2px;
   background:var(--cream);opacity:.85;
 }
 .rail-runner{
-  position:absolute;top:2px;left:0;width:5px;height:22px;border-radius:3px;
+  position:absolute;top:1px;left:0;width:5px;height:11px;border-radius:3px;
   background:var(--gold);box-shadow:0 0 12px var(--gold);
   transform:translateX(-2px);
   transition:left .28s cubic-bezier(.3,1,.4,1);
@@ -265,7 +265,16 @@ canvas,svg,img{-webkit-user-drag:none;user-drag:none}
   box-shadow:inset 0 0 0 1px rgba(255,243,226,.12);
   backdrop-filter:blur(8px);color:var(--cream-dim);font-variant-numeric:tabular-nums;
 }
-.chip.time{color:var(--teal)}
+.chip.time{
+  color:var(--teal);pointer-events:auto;cursor:pointer;border:0;line-height:1;
+  font-size:21px;padding:9px 15px;display:inline-flex;align-items:center;gap:9px;
+}
+.chip.time::after{
+  content:"";display:inline-block;width:.34em;height:.62em;opacity:.7;border-radius:1px;
+  background:linear-gradient(90deg,currentColor 0 36%,transparent 36% 64%,currentColor 64% 100%);
+}
+.chip.time:hover::after{opacity:.95}
+.chip.time:active{transform:scale(.96)}
 .chip.time.low{color:var(--coral);animation:lowpulse .8s ease-in-out infinite}
 @keyframes lowpulse{0%,100%{opacity:1}50%{opacity:.45}}
 .chip.combo{color:var(--gold);box-shadow:inset 0 0 0 1px rgba(255,215,94,.4)}
@@ -498,7 +507,7 @@ h2.title{
   .score-wrap{grid-area:score}
   .hud-col-r{grid-area:right}
   .rule{grid-area:rule;justify-self:center;margin-top:4px}
-  .rail{width:min(56vw,220px)}
+  .rail{width:min(46vw,150px)}
   .stats{grid-template-columns:repeat(2,1fr)}
   .item{grid-template-columns:auto 1fr;grid-template-rows:auto auto}
   .item .act{grid-column:1/-1;flex-direction:row;justify-content:flex-end;align-items:center;gap:10px}
@@ -521,21 +530,14 @@ h2.title{
         <div class="rail-goal"></div>
         <div class="rail-runner" id="railRunner"></div>
       </div>
-      <div class="rail-cap" id="railCap"><span id="railLbl">Objectif</span><b id="bestVal">0</b></div>
       <div id="recbadge">★ RECORD BATTU ★</div>
     </div>
 
     <div class="rule" id="ruleChip"></div>
 
     <div class="hud-col-r">
-      <div class="chiprow">
-        <div class="chip time" id="timeVal">60</div>
-        <button class="icon-btn" id="btnPause" aria-label="Pause">❚❚</button>
-      </div>
-      <div class="chiprow">
-        <div class="chip lvl" id="lvlVal">PALIER 1</div>
-        <div class="chip combo" id="comboVal" hidden>×1</div>
-      </div>
+      <button class="chip time" id="timeVal" aria-label="Temps — appuyer pour mettre en pause">60</button>
+      <div class="chip combo" id="comboVal" hidden>×1</div>
     </div>
   </header>
 
@@ -1358,7 +1360,6 @@ function update(dt) {
     S.rule = makeRule(); renderRule(); S.ruleAcc = 0;
     Sound.level();
     float(W / 2, bounds.t + 46, "PALIER " + lvl, "#FF9E3D", 26);
-    $("lvlVal").textContent = "PALIER " + lvl;
   }
   // rotation de consigne en Maîtrise
   if (cfg().tricky) {
@@ -1496,7 +1497,6 @@ function bump() {
 function celebrateRecord() {
   S.beaten = true;
   $("rail").classList.add("beaten");
-  $("railCap").classList.add("beaten");
   const b = $("recbadge");
   b.textContent = save.best[S.mode] > 0 ? "★ RECORD BATTU ★" : "★ OBJECTIF FRANCHI ★";
   b.classList.remove("show"); void b.offsetWidth; b.classList.add("show");
@@ -1721,13 +1721,10 @@ function updateHUD() {
   if (S.combo >= 2) { c.hidden = false; c.textContent = "×" + (1 + Math.min(S.combo, 20) * .1).toFixed(1).replace(".", ","); }
   else c.hidden = true;
 
-  const best = save.best[S.mode];
   const goal = targetOf(S.mode);
   const ratio = clamp(S.score / goal, 0, 1);
   $("railFill").style.width = (ratio * 100) + "%";
   $("railRunner").style.left = (ratio * 100) + "%";
-  $("railLbl").textContent = best > 0 ? "Record" : "Objectif";
-  $("bestVal").textContent = S.beaten ? fmt(S.score) : fmt(goal);
 }
 
 // Sans record établi, on offre quand même une barre à franchir :
@@ -1754,8 +1751,6 @@ function startGame(mode) {
   S.rule = makeRule();
 
   $("rail").classList.remove("beaten");
-  $("railCap").classList.remove("beaten");
-  $("lvlVal").textContent = "PALIER 1";
   renderRule();
   measureBounds();
   updateHUD();
@@ -2019,7 +2014,7 @@ document.addEventListener("visibilitychange", () => {
 });
 addEventListener("blur", () => { if (S.phase === "play") pauseGame(); });
 
-$("btnPause").addEventListener("click", () => { Sound.ui(); pauseGame(); });
+$("timeVal").addEventListener("click", () => { if (S.phase === "play") { Sound.ui(); pauseGame(); } });
 $("goPlay").addEventListener("click", () => { Sound.ui(); buildModes(); showVeil("s-modes"); });
 $("goSettings").addEventListener("click", () => { Sound.ui(); syncSettings(); showVeil("s-settings"); });
 $("resume").addEventListener("click", () => { Sound.ui(); resumeGame(); });
