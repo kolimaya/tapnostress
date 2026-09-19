@@ -257,6 +257,17 @@ canvas,svg,img{-webkit-user-drag:none;user-drag:none}
 .rule svg{width:17px;height:17px;display:block;filter:drop-shadow(0 0 8px currentColor)}
 .rule .swatch{width:12px;height:12px;border-radius:4px;box-shadow:0 0 10px currentColor,inset 0 0 0 1px rgba(0,0,0,.25);background:currentColor}
 .rule.avoid{box-shadow:inset 0 0 0 1px rgba(255,93,122,.55),0 10px 26px rgba(0,0,0,.4)}
+.rulewrap{position:relative;display:flex;justify-content:center}
+#lvlPop{
+  position:absolute;bottom:calc(100% + 7px);left:50%;
+  transform:translateX(-50%) translateY(8px);
+  padding:5px 13px;border-radius:99px;white-space:nowrap;pointer-events:none;z-index:2;
+  font-family:var(--f-display);font-size:11.5px;letter-spacing:.04em;
+  color:#2A1608;background:linear-gradient(120deg,var(--amber),var(--gold));
+  box-shadow:0 8px 22px rgba(255,158,61,.42);
+  opacity:0;transition:opacity .28s ease,transform .3s cubic-bezier(.2,1.5,.4,1);
+}
+#lvlPop.on{opacity:1;transform:translateX(-50%) translateY(0)}
 
 .chiprow{display:flex;gap:8px;align-items:center}
 .chip{
@@ -524,7 +535,7 @@ h2.title{
                0 calc(12px + env(safe-area-inset-left))}
   .score-wrap{grid-area:score}
   .hud-col-r{grid-area:right}
-  .rule{grid-area:rule;justify-self:center;margin-top:4px}
+  .rulewrap{grid-area:rule;justify-self:center;margin-top:4px}
   .rail{width:min(46vw,150px)}
   .stats{grid-template-columns:repeat(2,1fr)}
   .item{grid-template-columns:auto 1fr;grid-template-rows:auto auto}
@@ -551,7 +562,10 @@ h2.title{
       <div id="recbadge">★ RECORD BATTU ★</div>
     </div>
 
-    <div class="rule" id="ruleChip"></div>
+    <div class="rulewrap">
+      <div class="rule" id="ruleChip"></div>
+      <div id="lvlPop"></div>
+    </div>
 
     <div class="hud-col-r">
       <button class="chip time" id="timeVal" aria-label="Temps — appuyer pour mettre en pause">60</button>
@@ -1380,7 +1394,7 @@ function update(dt) {
     S.level = lvl;
     S.rule = makeRule(); renderRule(); S.ruleAcc = 0;
     Sound.level();
-    float(W / 2, bounds.t + 46, "PALIER " + lvl, "#FF9E3D", 26);
+    showLvlPop(lvl);
   }
   // rotation de consigne en Maîtrise
   if (cfg().tricky) {
@@ -1739,6 +1753,15 @@ function drawRipples(dt) {
 const $ = id => document.getElementById(id);
 const fmt = n => Math.round(n).toLocaleString("fr-FR");
 
+let lvlPopT = null;
+function showLvlPop(lvl) {
+  const el = $("lvlPop");
+  el.textContent = "PALIER " + lvl;
+  el.classList.remove("on"); void el.offsetWidth; el.classList.add("on");
+  clearTimeout(lvlPopT);
+  lvlPopT = setTimeout(() => el.classList.remove("on"), 1400);
+}
+
 function updateHUD() {
   $("scoreVal").textContent = fmt(S.score);
   const secs = Math.max(0, S.timeLeft / 1000);
@@ -1784,6 +1807,7 @@ function startGame(mode) {
   S.rule = makeRule();
 
   $("endfade").classList.remove("on");
+  $("lvlPop").classList.remove("on");
   $("rail").classList.remove("beaten");
   renderRule();
   measureBounds();
