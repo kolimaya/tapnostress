@@ -88,10 +88,14 @@
   font-family:"Baloo 2",var(--f-body);font-weight:800;
   font-size:clamp(34px,10.5vw,58px);line-height:.9;letter-spacing:.004em;padding-top:0;
   background:none;-webkit-background-clip:border-box;background-clip:border-box;
-  color:var(--cream);-webkit-text-fill-color:var(--cream);filter:none;
+  color:var(--cream);-webkit-text-fill-color:var(--cream);filter:none;text-shadow:none;
 }
 #s-home .brand h1 span{display:inline}
-#s-home .brand h1 .dot{color:var(--wm-accent);-webkit-text-fill-color:var(--wm-accent);margin:0 .04em}
+#s-home .brand h1 .dot{
+  display:inline-block;width:.15em;height:.15em;border-radius:50%;
+  background:var(--wm-accent);-webkit-text-fill-color:initial;
+  vertical-align:.34em;margin:0 .13em;box-shadow:none;filter:none;
+}
 #s-home .brand p{text-transform:none;letter-spacing:.01em;font-size:13.5px;font-weight:600;margin-top:9px;color:var(--muted)}
 .mascot{width:74px;height:74px;margin:0 auto 15px}
 .mascot svg{width:100%;height:100%;display:block;filter:drop-shadow(0 10px 22px var(--mascot-glow))}
@@ -539,7 +543,7 @@ h2.title{
       <button class="gearbtn" id="goSettings" aria-label="Réglages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3.1"/><path d="M12 2.6v3M12 18.4v3M2.6 12h3M18.4 12h3M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M18.8 5.2l-2.1 2.1M7.3 16.7l-2.1 2.1"/></svg></button>
       <div class="brand">
         <div class="mascot"><svg viewBox="0 0 100 100" aria-hidden="true"><rect x="4" y="4" width="92" height="92" rx="27" fill="var(--mascot-tile)"/><circle cx="37" cy="43" r="7" fill="var(--mascot-eyeP)"/><circle cx="63" cy="43" r="7" fill="var(--mascot-eyeB)"/><path d="M33 60 Q50 78 67 60" fill="none" stroke="var(--mascot-smile)" stroke-width="7" stroke-linecap="round"/></svg></div>
-        <h1>TAP<span class="dot">·</span>NO<br>STRESS</h1>
+        <h1>TAP<i class="dot"></i>NO<br>STRESS</h1>
         <p>Tape juste. Respire.</p>
       </div>
       <div class="home-play">
@@ -757,7 +761,8 @@ const LEGACY_KEYS = ["zolka.v1", "eclat.arcade.v1"];
 const DEFAULT_SAVE = {
   coins: 250, sound: true, haptics: true, theme: "auto", seen: true,
   best: { zen: 0, stress: 0, maitrise: 0, classic: 0 },
-  owned: { shapes: ["classique"], decors: ["foire"] },
+  /* TEMP essais : tous les décors déverrouillés — RETIRER avant prod (remettre ["foire"]) */
+  owned: { shapes: ["classique"], decors: ["foire", "aurore", "couchant"] },
   equip: { shapes: "classique", decors: "foire" }
 };
 let save = load();
@@ -778,7 +783,7 @@ function load() {
       best: Object.assign(d.best, s.best || {}),
       owned: {
         shapes: [...new Set(["classique", ...(s.owned?.shapes || [])])],
-        decors: [...new Set(["foire", ...(s.owned?.decors || [])])]
+        decors: [...new Set(["foire", "aurore", "couchant", ...(s.owned?.decors || [])])] /* TEMP essais — RETIRER avant prod (remettre "foire" seul) */
       },
       equip: {
         shapes: PACKS[s.equip?.shapes] ? s.equip.shapes : "classique",
