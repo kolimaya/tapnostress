@@ -24,9 +24,9 @@ on:
   workflow_dispatch:
     inputs:
       commande:
-        description: "etat = inventaire | exporter = fabrique fiche.json | metadonnees | captures"
+        description: "etat = inventaire | exporter = fabrique fiche.json | metadonnees | captures | builds = etat des binaires cote Apple"
         type: choice
-        options: [etat, exporter, metadonnees, captures]
+        options: [etat, exporter, metadonnees, captures, builds]
         default: etat
       appliquer:
         description: "Ecrire reellement dans App Store Connect (sinon : constat seul)"

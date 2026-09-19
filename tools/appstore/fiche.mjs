@@ -748,14 +748,62 @@ async function lireFiche() {
   return JSON.parse(await readFile(FICHE, 'utf8'));
 }
 
+/* ------------------------------------------------------------------ builds */
+
+/* POURQUOI CETTE COMMANDE : un « UPLOAD SUCCEEDED » d'altool ne prouve que le
+   transfert. Apple TRAITE ensuite le binaire, et ce traitement peut finir
+   INVALID (icône avec alpha, clé Info.plist manquante, déclaration de
+   chiffrement…) ; le build disparaît alors de TestFlight sans autre trace qu'un
+   e-mail. Ou il reste « en attente de conformité » : présent, mais inutilisable
+   tant qu'on n'a pas répondu à la question d'export. Cette commande lit l'état
+   réel de chaque build côté Apple, pour ne plus deviner. Lecture seule. */
+async function cmdBuilds() {
+  const fiche = existsSync(FICHE) ? JSON.parse(await readFile(FICHE, 'utf8')) : {};
+  const bundle = opt('bundle') ?? fiche?.app?.bundleId ?? bundleDuProjet();
+  if (!bundle) throw new Error('bundleId inconnu : passer --bundle= ou le déclarer dans fiche.json.');
+  const apps = await tout(`/v1/apps?filter[bundleId]=${encodeURIComponent(bundle)}`);
+  if (!apps.length) throw new Error(`Aucune app pour le bundle ${bundle} sur ce compte.`);
+  const app = apps[0];
+  console.log(`App        ${app.attributes.name}  (${bundle})  id ${app.id}`);
+
+  const builds = await tout(
+    `/v1/builds?filter[app]=${app.id}&sort=-uploadedDate&limit=25`
+    + `&fields[builds]=version,uploadedDate,expired,processingState,usesNonExemptEncryption`);
+  if (!builds.length) {
+    console.log('\n— AUCUN build côté Apple. Soit rien n\'est encore arrivé au traitement, '
+      + 'soit le dernier a été REJETÉ au traitement (chercher un e-mail Apple « Invalid Binary »).');
+    return;
+  }
+  console.log(`\n${builds.length} build(s), du plus récent au plus ancien :`);
+  for (const b of builds) {
+    const x = b.attributes;
+    const detail = await api(`/v1/builds/${b.id}/buildBetaDetail`).catch(() => null);
+    const d = detail?.data?.attributes;
+    const testflight = d
+      ? `interne ${d.internalBuildState ?? '?'} · externe ${d.externalBuildState ?? '?'}`
+      : '(pas de détail TestFlight)';
+    const conformite = x.usesNonExemptEncryption === null
+      ? 'conformité chiffrement NON RENSEIGNÉE'
+      : `chiffrement ${x.usesNonExemptEncryption ? 'soumis à déclaration' : 'exempté'}`;
+    console.log(`  • build ${x.version}  — traitement ${x.processingState}${x.expired ? ' — EXPIRÉ' : ''}`);
+    console.log(`      téléversé ${x.uploadedDate}`);
+    console.log(`      TestFlight : ${testflight}`);
+    console.log(`      ${conformite}`);
+  }
+  console.log('\nLecture : PROCESSING = en cours (patienter) · VALID = disponible · '
+    + 'INVALID/FAILED = rejeté au traitement. « MISSING_EXPORT_COMPLIANCE » = '
+    + 'répondre à la question de chiffrement pour le rendre utilisable.');
+}
+
 /* ------------------------------------------------------------------ main */
 
 const COMMANDES = {
   etat: cmdEtat, exporter: cmdExporter, metadonnees: cmdMetadonnees, captures: cmdCaptures,
+  builds: cmdBuilds,
 };
 
 if (!COMMANDES[commande]) {
-  console.error('usage : node tools/appstore/fiche.mjs <etat|exporter|metadonnees|captures> [--appliquer]');
+  console.error('usage : node tools/appstore/fiche.mjs <etat|exporter|metadonnees|captures|builds> [--appliquer]');
   process.exit(2);
 }
 try {
