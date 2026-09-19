@@ -803,8 +803,7 @@ const LEGACY_KEYS = ["zolka.v1", "eclat.arcade.v1"];
 const DEFAULT_SAVE = {
   coins: 250, sound: true, haptics: true, theme: "auto", seen: true,
   best: { zen: 0, stress: 0, maitrise: 0, classic: 0 },
-  /* TEMP essais : tous les décors déverrouillés — RETIRER avant prod (remettre ["foire"]) */
-  owned: { shapes: ["classique"], decors: ["foire", "aurore", "couchant"] },
+  owned: { shapes: ["classique"], decors: ["foire"] },
   equip: { shapes: "classique", decors: "foire" }
 };
 let save = load();
@@ -825,7 +824,7 @@ function load() {
       best: Object.assign(d.best, s.best || {}),
       owned: {
         shapes: [...new Set(["classique", ...(s.owned?.shapes || [])])],
-        decors: [...new Set(["foire", "aurore", "couchant", ...(s.owned?.decors || [])])] /* TEMP essais — RETIRER avant prod (remettre "foire" seul) */
+        decors: [...new Set(["foire", ...(s.owned?.decors || [])])]
       },
       equip: {
         shapes: PACKS[s.equip?.shapes] ? s.equip.shapes : "classique",
