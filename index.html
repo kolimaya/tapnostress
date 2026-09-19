@@ -302,8 +302,12 @@ canvas,svg,img{-webkit-user-drag:none;user-drag:none}
   padding:calc(18px + env(safe-area-inset-top)) calc(18px + env(safe-area-inset-right))
           calc(18px + env(safe-area-inset-bottom)) calc(18px + env(safe-area-inset-left));
   touch-action:pan-y;
-  background:radial-gradient(120% 90% at 50% 0%,rgba(23,17,31,.72),rgba(15,10,22,.94));
-  backdrop-filter:blur(14px) saturate(.85);
+  background:
+    radial-gradient(62% 52% at 16% 10%, rgba(122,120,244,.34), transparent 62%),
+    radial-gradient(58% 48% at 86% 20%, rgba(84,226,196,.24), transparent 62%),
+    radial-gradient(72% 56% at 66% 104%, rgba(255,124,178,.20), transparent 60%),
+    radial-gradient(130% 100% at 50% -4%, rgba(46,30,66,.62), rgba(28,19,42,.85));
+  backdrop-filter:blur(16px) saturate(1.05);
   overflow-y:auto;overscroll-behavior:contain;
 }
 #veil[hidden]{display:none}
