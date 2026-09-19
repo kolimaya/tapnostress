@@ -267,7 +267,8 @@ canvas,svg,img{-webkit-user-drag:none;user-drag:none}
 }
 .chip.time{
   color:var(--teal);pointer-events:auto;cursor:pointer;border:0;line-height:1;
-  font-size:21px;padding:9px 15px;display:inline-flex;align-items:center;gap:9px;
+  font-size:clamp(30px,6.4vw,46px);padding:6px 16px;
+  display:inline-flex;align-items:center;gap:10px;
 }
 .chip.time::after{
   content:"";display:inline-block;width:.34em;height:.62em;opacity:.7;border-radius:1px;
