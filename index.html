@@ -287,7 +287,9 @@ canvas,svg,img{-webkit-user-drag:none;user-drag:none}
 }
 .chip.time:hover::after{opacity:.95}
 .chip.time:active{transform:scale(.96)}
-.chip.time.low{color:var(--coral);animation:lowpulse .8s ease-in-out infinite}
+.chip.time.low{color:var(--coral)}
+.chip.time.tick{animation:timetick .36s cubic-bezier(.2,1.5,.4,1)}
+@keyframes timetick{0%{transform:scale(1);filter:none}32%{transform:scale(1.18);filter:drop-shadow(0 0 12px var(--coral))}100%{transform:scale(1);filter:none}}
 @keyframes lowpulse{0%,100%{opacity:1}50%{opacity:.45}}
 .chip.combo{position:absolute;top:calc(100% + 7px);right:0;color:var(--gold);box-shadow:inset 0 0 0 1px rgba(255,215,94,.4)}
 .chip.lvl{color:var(--amber)}
@@ -879,6 +881,7 @@ const Sound = (() => {
     record() {[0,7,12,16,19].forEach((s,i)=>tone(392*Math.pow(2,s/12),{type:"triangle",dur:.34,gain:.075,delay:i*.07}));},
     ui() { tone(520, { type: "sine", dur: .06, gain: .05 }); },
     buy() {[0,5,9,12].forEach((s,i)=>tone(440*Math.pow(2,s/12),{type:"triangle",dur:.18,gain:.08,delay:i*.06}));},
+    tick(n) { tone(660 + (10 - Math.min(10, n)) * 42, { type: "sine", dur: .05, gain: .055 }); },
     over() {[0,-3,-7,-12].forEach((s,i)=>tone(440*Math.pow(2,s/12),{type:"sine",dur:.3,gain:.08,delay:i*.11}));}
   };
 })();
@@ -1768,6 +1771,16 @@ function updateHUD() {
   $("timeVal").textContent = secs < 10 ? secs.toFixed(1).replace(".", ",") : Math.ceil(secs);
   $("timeVal").classList.toggle("low", secs <= 10);
 
+  // Dernières 10 s : un tic + un scintillement du timer à chaque seconde,
+  // pour préparer le joueur à l'échéance.
+  const whole = Math.ceil(secs);
+  if (S.phase === "play" && whole >= 1 && whole <= 10 && whole !== S.tickSec) {
+    S.tickSec = whole;
+    Sound.tick(whole);
+    const t = $("timeVal");
+    t.classList.remove("tick"); void t.offsetWidth; t.classList.add("tick");
+  }
+
   const frac = clamp(S.timeLeft / (cfg().time * 1000), 0, 1);
   const tf = $("timefill");
   tf.style.width = (frac * 100) + "%";
@@ -1802,7 +1815,7 @@ function startGame(mode) {
   S.timeLeft = MODES[mode].time * 1000; S.elapsed = 0;
   S.spawnAcc = 0; S.bonusAcc = 0; S.ruleAcc = 0;
   S.hits = 0; S.taps = 0; S.misses = 0;
-  S.beaten = false; S.shake = 0; S.flash = 0; S.energy = 0; S.endT = 0;
+  S.beaten = false; S.shake = 0; S.flash = 0; S.energy = 0; S.endT = 0; S.tickSec = null;
   shapes = []; parts = []; pops = []; rings = []; texts = []; ripples = [];
   S.rule = makeRule();
 
