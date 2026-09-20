@@ -33,6 +33,7 @@
   --f-body:"Nunito","Segoe UI",system-ui,sans-serif;
   --f-data:"Chakra Petch","Nunito",system-ui,sans-serif;
   --wave-col:rgba(111,231,200,.52);
+  --cta-wave:rgba(255,199,110,.55);
   --orb-bg:linear-gradient(140deg,#7BE9CC,#69B7F2); --orb-ink:#12233A;
   --orb-glow:0 14px 34px rgba(96,214,190,.42); --wm-accent:#6FE7C8;
   --mascot-tile:#2C1F42; --mascot-eyeP:#FF5C8A; --mascot-eyeB:#4AA3FF;
@@ -45,6 +46,7 @@
   --line:#E6D6E7; --cream:#4A3F57; --cream-dim:#6D6076; --muted:#948699;
   --amber:#E68636; --coral:#FF6F94; --gold:#D98A22; --teal:#2FA594; --danger:#E0435A;
   --wave-col:rgba(255,126,168,.5);
+  --cta-wave:rgba(255,150,92,.5);
   --orb-bg:linear-gradient(140deg,#FF9E76,#FF7DA8); --orb-ink:#ffffff;
   --orb-glow:0 14px 30px rgba(255,126,168,.46); --wm-accent:#FF7DA8;
   --mascot-tile:#FFF3E2; --mascot-eyeP:#FF5C8A; --mascot-eyeB:#4AA3FF;
@@ -72,7 +74,7 @@
   box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 6px 16px rgba(120,90,140,.14);
 }
 :root[data-theme="aube"] .hint{background:rgba(47,165,148,.12)}
-:root[data-theme="aube"] .stat{background:rgba(255,255,255,.6)}
+:root[data-theme="aube"] .stat{background:linear-gradient(180deg,rgba(255,255,255,.62),rgba(255,255,255,.34));box-shadow:inset 0 1px 0 rgba(255,255,255,.85),0 6px 16px rgba(120,90,140,.12)}
 :root[data-theme="aube"] .wallet{background:linear-gradient(120deg,rgba(230,134,54,.16),rgba(255,111,148,.12))}
 :root[data-theme="aube"] .item{background:rgba(255,255,255,.66);box-shadow:inset 0 0 0 1px var(--line)}
 :root[data-theme="aube"] .item.equipped{box-shadow:inset 0 0 0 1.5px var(--amber),0 0 24px rgba(230,134,54,.16)}
@@ -114,7 +116,7 @@
 .mascot{width:74px;height:74px;margin:0 auto 15px}
 .mascot svg{width:100%;height:100%;display:block;filter:drop-shadow(0 10px 22px var(--mascot-glow))}
 .home-play{flex:1;display:grid;place-items:center;width:100%;min-height:220px}
-@media (prefers-reduced-motion:reduce){.wave{display:none}.play-orb{animation:none}}
+@media (prefers-reduced-motion:reduce){.wave,.cwave{display:none}.play-orb{animation:none}}
 .playzone{position:relative;display:grid;place-items:center;width:210px;height:210px;margin:0 auto}
 .wave{
   position:absolute;width:150px;height:150px;border-radius:50%;
@@ -446,13 +448,27 @@ h2.title{
 }
 .ribbon.quiet{background:rgba(255,243,226,.08);color:var(--cream-dim);box-shadow:inset 0 0 0 1px var(--line);font-family:var(--f-body);font-weight:800}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:20px 0 4px}
-.stat{padding:12px 8px;border-radius:12px;background:rgba(15,10,22,.5);box-shadow:inset 0 0 0 1px var(--line);text-align:center}
+.stat{padding:12px 8px;border-radius:12px;text-align:center;
+  background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.015));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 6px 16px rgba(0,0,0,.16);
+  backdrop-filter:blur(14px) saturate(1.5)}
 .stat b{display:block;font-family:var(--f-data);font-size:19px;color:var(--cream);font-variant-numeric:tabular-nums}
 .stat span{display:block;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:3px;font-weight:700}
 .earn{
   display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;
   font-family:var(--f-data);font-size:14px;color:var(--gold);
 }
+/* CTA « Rejouer » : mise en valeur par ondes d'eau — écho de l'orbe d'accueil/pause */
+.cta{position:relative;margin-top:18px}
+.cwave{
+  position:absolute;inset:0;border-radius:var(--r-m);pointer-events:none;z-index:0;
+  border:2.5px solid var(--cta-wave);filter:blur(2px);
+  opacity:0;animation:ctawave 5s ease-out infinite;
+}
+.cwave:nth-child(2){animation-delay:1.66s}
+.cwave:nth-child(3){animation-delay:3.33s}
+.cta .btn{position:relative;z-index:1}
+@keyframes ctawave{0%{transform:scale(.96);opacity:0}14%{opacity:.55}100%{transform:scale(1.16);opacity:0}}
 
 /* countdown */
 #count{
@@ -655,7 +671,10 @@ h2.title{
         </div>
         <div class="stats" id="finalStats"></div>
         <div class="earn"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 6.2L21 10l-5.1 4.2L17.4 21 12 17.4 6.6 21l1.5-6.8L3 10l6.6-1.8z"/></svg><span id="finalCoins">+0 éclats</span></div>
-        <button class="btn" id="again" style="margin-top:18px">REJOUER</button>
+        <div class="cta">
+          <span class="cwave"></span><span class="cwave"></span><span class="cwave"></span>
+          <button class="btn" id="again">REJOUER</button>
+        </div>
         <div class="btn-row">
           <button class="btn ghost" id="overModes">Autre mode</button>
           <button class="btn ghost" id="overShop">Boutique</button>
