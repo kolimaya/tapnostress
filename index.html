@@ -183,84 +183,38 @@ canvas,svg,img{-webkit-user-drag:none;user-drag:none}
 #stage{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:pointer}
 
 /* ---------- HUD ---------- */
+/* Playground aéré : le HUD ne porte plus que deux permanents — le timer
+   miniature (coin) et le score (dessiné en géant translucide sur le canvas,
+   comme un élément du décor). La consigne, le combo, la célébration de record
+   sont circonstanciels. #hud couvre l'écran ; ses enfants sont positionnés. */
 #hud{
-  position:absolute;left:0;right:0;top:0;z-index:5;
-  padding:calc(14px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right))
-          0 calc(16px + env(safe-area-inset-left));
-  display:grid;grid-template-columns:1fr auto 1fr;align-items:start;gap:12px;
-  pointer-events:none;
+  position:absolute;inset:0;z-index:5;pointer-events:none;
   opacity:0;transform:translateY(-10px);transition:opacity .35s ease,transform .35s ease;
 }
 #hud.on{opacity:1;transform:none}
-.hud-col-r{position:relative;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
 
-.score-wrap{position:relative;display:flex;flex-direction:column;gap:7px;min-width:0}
-.score{
-  font-family:var(--f-data);font-weight:700;font-size:clamp(30px,6.4vw,46px);
-  line-height:.92;letter-spacing:-.01em;font-variant-numeric:tabular-nums;
-  color:var(--cream);text-shadow:0 3px 0 rgba(0,0,0,.35);
+/* consigne — circonstancielle : apparaît quand elle change, puis s'efface */
+.rulewrap{
+  position:absolute;top:calc(11px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);
+  display:flex;justify-content:center;max-width:calc(100% - 132px);pointer-events:none;
 }
-.score.bumped{animation:scorebump .3s cubic-bezier(.2,1.6,.4,1)}
-@keyframes scorebump{0%{transform:scale(1)}40%{transform:scale(1.13);color:var(--gold)}100%{transform:scale(1)}}
-
-/* the record rail — always-on objective */
-.rail{
-  position:relative;width:min(38vw,168px);height:13px;
-  display:flex;align-items:center;
-}
-.rail-track{
-  position:absolute;left:0;right:0;top:4px;height:5px;border-radius:99px;
-  background:rgba(255,243,226,.10);
-  box-shadow:inset 0 0 0 1px rgba(255,243,226,.10);
-  overflow:hidden;
-}
-.rail-fill{
-  position:absolute;left:0;top:0;bottom:0;width:0%;border-radius:99px;
-  background:linear-gradient(90deg,var(--coral),var(--amber));
-  box-shadow:0 0 14px rgba(255,158,61,.45);
-  transition:width .28s cubic-bezier(.3,1,.4,1);
-}
-.rail-goal{
-  position:absolute;right:-1px;top:1px;width:3px;height:11px;border-radius:2px;
-  background:var(--cream);opacity:.85;
-}
-.rail-runner{
-  position:absolute;top:1px;left:0;width:5px;height:11px;border-radius:3px;
-  background:var(--gold);box-shadow:0 0 12px var(--gold);
-  transform:translateX(-2px);
-  transition:left .28s cubic-bezier(.3,1,.4,1);
-}
-.rail.beaten .rail-fill{background:linear-gradient(90deg,var(--amber),var(--gold));box-shadow:0 0 20px rgba(255,215,94,.6)}
-.rail.beaten .rail-track{box-shadow:inset 0 0 0 1px rgba(255,215,94,.55)}
-.rail.beaten .rail-goal{background:var(--gold);animation:goalpulse 1.6s ease-in-out infinite}
-@keyframes goalpulse{0%,100%{opacity:.55}50%{opacity:1}}
-.rail-cap{
-  display:flex;align-items:baseline;gap:6px;font-size:10.5px;letter-spacing:.14em;
-  font-weight:700;color:var(--muted);text-transform:uppercase;
-}
-.rail-cap b{font-family:var(--f-data);font-size:13px;color:var(--cream-dim);letter-spacing:.02em;font-variant-numeric:tabular-nums}
-.rail-cap.beaten{color:var(--gold)}
-.rail-cap.beaten b{color:var(--gold)}
-
-/* consigne */
 .rule{
-  pointer-events:none;
-  display:flex;align-items:center;gap:10px;
+  pointer-events:none;display:flex;align-items:center;gap:10px;
   padding:9px 15px 9px 12px;border-radius:99px;
   background:rgba(36,26,48,.82);
   box-shadow:inset 0 0 0 1px rgba(255,243,226,.13),0 10px 26px rgba(0,0,0,.4);
   backdrop-filter:blur(10px);
   font-weight:800;font-size:clamp(11px,2.5vw,14px);letter-spacing:.06em;text-transform:uppercase;
   white-space:nowrap;
-  animation:ruleIn .4s cubic-bezier(.2,1.4,.4,1);
+  opacity:0;transform:translateY(-8px) scale(.94);
+  transition:opacity .35s ease,transform .4s cubic-bezier(.2,1.4,.4,1);
 }
-@keyframes ruleIn{from{transform:translateY(-8px) scale(.9);opacity:0}to{transform:none;opacity:1}}
+.rule.on{opacity:1;transform:none}
 .rule .verb{color:var(--muted);font-size:.82em;letter-spacing:.14em}
 .rule .tok{display:inline-flex;align-items:center;gap:6px;color:var(--cream)}
 .rule svg{width:17px;height:17px;display:block;filter:drop-shadow(0 0 8px currentColor)}
 .rule .swatch{width:12px;height:12px;border-radius:4px;box-shadow:0 0 10px currentColor,inset 0 0 0 1px rgba(0,0,0,.25);background:currentColor}
 .rule.avoid{box-shadow:inset 0 0 0 1px rgba(255,93,122,.55),0 10px 26px rgba(0,0,0,.4)}
-.rulewrap{position:relative;display:flex;justify-content:center}
 #lvlPop{
   position:absolute;bottom:calc(100% + 7px);left:50%;
   transform:translateX(-50%) translateY(8px);
@@ -280,9 +234,9 @@ canvas,svg,img{-webkit-user-drag:none;user-drag:none}
   backdrop-filter:blur(8px);color:var(--cream-dim);font-variant-numeric:tabular-nums;
 }
 .chip.time{
+  position:absolute;top:calc(11px + env(safe-area-inset-top));right:calc(14px + env(safe-area-inset-right));
   color:var(--teal);pointer-events:auto;cursor:pointer;border:0;line-height:1;
-  font-size:clamp(30px,6.4vw,46px);padding:6px 16px;
-  display:inline-flex;align-items:center;gap:10px;
+  font-size:15px;padding:6px 11px;display:inline-flex;align-items:center;gap:7px;
 }
 .chip.time::after{
   content:"";display:inline-block;width:.34em;height:.62em;opacity:.7;border-radius:1px;
@@ -294,7 +248,7 @@ canvas,svg,img{-webkit-user-drag:none;user-drag:none}
 .chip.time.tick{animation:timetick .36s cubic-bezier(.2,1.5,.4,1)}
 @keyframes timetick{0%{transform:scale(1);filter:none}32%{transform:scale(1.18);filter:drop-shadow(0 0 12px var(--coral))}100%{transform:scale(1);filter:none}}
 @keyframes lowpulse{0%,100%{opacity:1}50%{opacity:.45}}
-.chip.combo{position:absolute;top:calc(100% + 7px);right:0;color:var(--gold);box-shadow:inset 0 0 0 1px rgba(255,215,94,.4)}
+.chip.combo{position:absolute;top:calc(11px + env(safe-area-inset-top));left:calc(14px + env(safe-area-inset-left));color:var(--gold);box-shadow:inset 0 0 0 1px rgba(255,215,94,.4)}
 .chip.lvl{color:var(--amber)}
 .icon-btn{
   pointer-events:auto;width:38px;height:38px;flex:none;border:0;cursor:pointer;
@@ -315,18 +269,19 @@ canvas,svg,img{-webkit-user-drag:none;user-drag:none}
 
 /* record badge — la célébration naît sur l'objectif lui-même, en périphérie du regard */
 #recbadge{
-  position:absolute;z-index:7;top:calc(100% + 9px);left:0;
+  position:absolute;z-index:7;top:calc(52px + env(safe-area-inset-top));left:50%;
   padding:8px 15px;border-radius:99px;pointer-events:none;opacity:0;
   background:linear-gradient(120deg,var(--amber),var(--gold));
   color:#2A1608;font-family:var(--f-display);font-size:12px;letter-spacing:.03em;
   box-shadow:0 10px 30px rgba(255,158,61,.42);white-space:nowrap;
+  transform:translateX(-50%);
 }
 #recbadge.show{animation:recIn 2.8s cubic-bezier(.2,1,.3,1) forwards}
 @keyframes recIn{
-  0%{opacity:0;transform:translateY(10px) scale(.86)}
-  10%{opacity:1;transform:translateY(0) scale(1)}
-  75%{opacity:1;transform:translateY(0) scale(1)}
-  100%{opacity:0;transform:translateY(-14px) scale(.97)}
+  0%{opacity:0;transform:translate(-50%,10px) scale(.86)}
+  10%{opacity:1;transform:translate(-50%,0) scale(1)}
+  75%{opacity:1;transform:translate(-50%,0) scale(1)}
+  100%{opacity:0;transform:translate(-50%,-14px) scale(.97)}
 }
 
 /* ---------- overlays ---------- */
@@ -531,17 +486,6 @@ h2.title{
 .hint b{color:var(--teal)}
 
 @media (max-width:520px){
-  /* Grille en zones : score en haut à gauche, chrono/pause/palier en haut à
-     droite (alignés), et la consigne en pleine largeur juste dessous — sans
-     que la colonne de droite ne se fasse repousser vers le bas. */
-  #hud{grid-template-columns:1fr auto;gap:6px 8px;align-items:start;
-       grid-template-areas:"score right" "rule rule";
-       padding:calc(12px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right))
-               0 calc(12px + env(safe-area-inset-left))}
-  .score-wrap{grid-area:score}
-  .hud-col-r{grid-area:right}
-  .rulewrap{grid-area:rule;justify-self:center;margin-top:4px}
-  .rail{width:min(46vw,150px)}
   .stats{grid-template-columns:repeat(2,1fr)}
   .item{grid-template-columns:auto 1fr;grid-template-rows:auto auto}
   .item .act{grid-column:1/-1;flex-direction:row;justify-content:flex-end;align-items:center;gap:10px}
@@ -557,25 +501,13 @@ h2.title{
   <div id="timebar"><div id="timefill"></div></div>
 
   <header id="hud">
-    <div class="score-wrap">
-      <div class="score" id="scoreVal">0</div>
-      <div class="rail" id="rail">
-        <div class="rail-track"><div class="rail-fill" id="railFill"></div></div>
-        <div class="rail-goal"></div>
-        <div class="rail-runner" id="railRunner"></div>
-      </div>
-      <div id="recbadge">★ RECORD BATTU ★</div>
-    </div>
-
+    <button class="chip time" id="timeVal" aria-label="Temps — appuyer pour mettre en pause">60</button>
+    <div class="chip combo" id="comboVal" hidden>×1</div>
     <div class="rulewrap">
       <div class="rule" id="ruleChip"></div>
       <div id="lvlPop"></div>
     </div>
-
-    <div class="hud-col-r">
-      <button class="chip time" id="timeVal" aria-label="Temps — appuyer pour mettre en pause">60</button>
-      <div class="chip combo" id="comboVal" hidden>×1</div>
-    </div>
+    <div id="recbadge">★ RECORD BATTU ★</div>
   </header>
 
   <div id="count"><b>3</b></div>
@@ -1225,7 +1157,7 @@ const S = {
   hits: 0, taps: 0, misses: 0,
   rule: null, ruleAcc: 0,
   beaten: false, shake: 0, flash: 0, flashCol: "#FF4D5E",
-  energy: 0
+  energy: 0, scorePulse: 0, endT: 0, tickSec: null
 };
 let shapes = [], parts = [], pops = [], rings = [], texts = [], ripples = [];
 let bounds = { t: 120, l: 20, r: 0, b: 0 };
@@ -1302,7 +1234,17 @@ function renderRule() {
   else { html = `<span class="verb">Tout sauf le</span>${clr}`; avoid = true; }
   el.className = "rule" + (avoid ? " avoid" : "");
   el.innerHTML = html;
-  el.style.animation = "none"; void el.offsetWidth; el.style.animation = "";
+  showRule();
+}
+
+/* La consigne n'est plus permanente : elle surgit quand elle change (début de
+   partie, montée de palier, rotation en Maîtrise) puis s'efface. */
+let ruleHideT = null;
+function showRule() {
+  const el = $("ruleChip");
+  el.classList.remove("on"); void el.offsetWidth; el.classList.add("on");
+  clearTimeout(ruleHideT);
+  ruleHideT = setTimeout(() => el.classList.remove("on"), 2800);
 }
 
 /* — spawn — */
@@ -1549,13 +1491,11 @@ function breakCombo() {
 }
 
 function bump() {
-  const el = $("scoreVal");
-  el.classList.remove("bumped"); void el.offsetWidth; el.classList.add("bumped");
+  S.scorePulse = 1;   // pulse du score-décor à chaque gain
 }
 
 function celebrateRecord() {
   S.beaten = true;
-  $("rail").classList.add("beaten");
   const b = $("recbadge");
   b.textContent = save.best[S.mode] > 0 ? "★ RECORD BATTU ★" : "★ OBJECTIF FRANCHI ★";
   b.classList.remove("show"); void b.offsetWidth; b.classList.add("show");
@@ -1580,7 +1520,9 @@ function render(dt) {
 
   Decor.draw(gt, S.energy);
 
-  if (S.phase === "play" || S.phase === "pause" || S.phase === "count") {
+  const scene = S.phase === "play" || S.phase === "pause" || S.phase === "count" || S.phase === "ending";
+  if (scene) {
+    drawBigScore(dt);            // score géant translucide, DERRIÈRE les formes
     drawShapes(dt);
     drawPops(dt);
     drawRings(dt);
@@ -1595,6 +1537,23 @@ function render(dt) {
     ctx.fillRect(0, 0, W, H);
     ctx.globalCompositeOperation = "source-over";
   }
+  ctx.restore();
+}
+
+/* Le score comme élément du décor : énorme, centré, translucide, derrière les
+   formes. Rendu au canvas (et non en HUD) pour qu'il vive avec la scène. */
+function drawBigScore(dt) {
+  if (S.scorePulse > 0) S.scorePulse = Math.max(0, S.scorePulse - dt / 300);
+  const font = (px) => `700 ${px}px "Chakra Petch", "Nunito", sans-serif`;
+  let size = Math.min(W, H) * 0.46 * (1 + easeOutCubic(S.scorePulse) * 0.06);
+  ctx.save();
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.font = font(size);
+  const txt = fmt(S.score);
+  const w = ctx.measureText(txt).width;
+  if (w > W * 0.9) { size *= (W * 0.9) / w; ctx.font = font(size); }
+  ctx.fillStyle = effTheme() === "aube" ? "rgba(74,63,87,0.11)" : "rgba(255,243,226,0.09)";
+  ctx.fillText(txt, W / 2, H * 0.5);
   ctx.restore();
 }
 
@@ -1775,7 +1734,6 @@ function showLvlPop(lvl) {
 }
 
 function updateHUD() {
-  $("scoreVal").textContent = fmt(S.score);
   const secs = Math.max(0, S.timeLeft / 1000);
   $("timeVal").textContent = secs < 10 ? secs.toFixed(1).replace(".", ",") : Math.ceil(secs);
   $("timeVal").classList.toggle("low", secs <= 10);
@@ -1798,11 +1756,6 @@ function updateHUD() {
   const c = $("comboVal");
   if (S.combo >= 2) { c.hidden = false; c.textContent = "×" + (1 + Math.min(S.combo, 20) * .1).toFixed(1).replace(".", ","); }
   else c.hidden = true;
-
-  const goal = targetOf(S.mode);
-  const ratio = clamp(S.score / goal, 0, 1);
-  $("railFill").style.width = (ratio * 100) + "%";
-  $("railRunner").style.left = (ratio * 100) + "%";
 }
 
 // Sans record établi, on offre quand même une barre à franchir :
@@ -1824,20 +1777,18 @@ function startGame(mode) {
   S.timeLeft = MODES[mode].time * 1000; S.elapsed = 0;
   S.spawnAcc = 0; S.bonusAcc = 0; S.ruleAcc = 0;
   S.hits = 0; S.taps = 0; S.misses = 0;
-  S.beaten = false; S.shake = 0; S.flash = 0; S.energy = 0; S.endT = 0; S.tickSec = null;
+  S.beaten = false; S.shake = 0; S.flash = 0; S.energy = 0; S.endT = 0; S.tickSec = null; S.scorePulse = 0;
   shapes = []; parts = []; pops = []; rings = []; texts = []; ripples = [];
   S.rule = makeRule();
 
   $("endfade").classList.remove("on");
   $("lvlPop").classList.remove("on");
-  $("rail").classList.remove("beaten");
   renderRule();
   measureBounds();
   updateHUD();
 
   hideVeil();
   $("hud").classList.add("on");
-  $("timebar").classList.add("on");
 
   armCountdown(2600, ["3", "2", "1", "GO !"]);
 }
@@ -1862,6 +1813,7 @@ function beginPlay() {
   S.phase = "play";
   last = performance.now();             // pas de bond de temps après un gel de frames
   measureBounds();
+  showRule();                            // rappel de la consigne au lancement du jeu
   const n = cfg().solo ? 1 : 3;
   for (let i = 0; i < n; i++) spawnShape(i === 0);
 }
