@@ -1556,7 +1556,7 @@ function drawBigScore(dt) {
   const w = ctx.measureText(txt).width;
   if (w > W * 0.9) { size *= (W * 0.9) / w; ctx.font = font(size); }
   ctx.fillStyle = effTheme() === "aube" ? "rgba(74,63,87,0.05)" : "rgba(255,243,226,0.05)";
-  ctx.fillText(txt, W / 2, H * 0.5 - 10);
+  ctx.fillText(txt, W / 2, H * 0.5 - 20);
   ctx.restore();
 }
 
