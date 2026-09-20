@@ -195,14 +195,14 @@ canvas,svg,img{-webkit-user-drag:none;user-drag:none}
 
 /* consigne — circonstancielle : apparaît quand elle change, puis s'efface */
 .rulewrap{
-  position:absolute;top:calc(11px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);
-  display:flex;justify-content:center;max-width:calc(100% - 132px);pointer-events:none;
+  position:absolute;top:calc(48px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);
+  display:flex;justify-content:center;max-width:calc(100% - 32px);pointer-events:none;
 }
 .rule{
   pointer-events:none;display:flex;align-items:center;gap:10px;
   padding:9px 15px 9px 12px;border-radius:99px;
   background:rgba(36,26,48,.82);
-  box-shadow:inset 0 0 0 1px rgba(255,243,226,.13),0 10px 26px rgba(0,0,0,.4);
+  box-shadow:inset 0 0 0 1px rgba(255,243,226,.16),0 8px 22px rgba(0,0,0,.34),0 0 26px 2px rgba(255,213,110,.42);
   backdrop-filter:blur(10px);
   font-weight:800;font-size:clamp(11px,2.5vw,14px);letter-spacing:.06em;text-transform:uppercase;
   white-space:nowrap;
@@ -214,7 +214,7 @@ canvas,svg,img{-webkit-user-drag:none;user-drag:none}
 .rule .tok{display:inline-flex;align-items:center;gap:6px;color:var(--cream)}
 .rule svg{width:17px;height:17px;display:block;filter:drop-shadow(0 0 8px currentColor)}
 .rule .swatch{width:12px;height:12px;border-radius:4px;box-shadow:0 0 10px currentColor,inset 0 0 0 1px rgba(0,0,0,.25);background:currentColor}
-.rule.avoid{box-shadow:inset 0 0 0 1px rgba(255,93,122,.55),0 10px 26px rgba(0,0,0,.4)}
+.rule.avoid{box-shadow:inset 0 0 0 1px rgba(255,93,122,.55),0 8px 22px rgba(0,0,0,.34),0 0 26px 2px rgba(255,93,122,.5)}
 #lvlPop{
   position:absolute;bottom:calc(100% + 7px);left:50%;
   transform:translateX(-50%) translateY(8px);
@@ -233,9 +233,12 @@ canvas,svg,img{-webkit-user-drag:none;user-drag:none}
   box-shadow:inset 0 0 0 1px rgba(255,243,226,.12);
   backdrop-filter:blur(8px);color:var(--cream-dim);font-variant-numeric:tabular-nums;
 }
+.timepos{
+  position:absolute;top:calc(11px + env(safe-area-inset-top));left:0;right:0;
+  display:flex;justify-content:center;pointer-events:none;
+}
 .chip.time{
-  position:absolute;top:calc(11px + env(safe-area-inset-top));right:calc(14px + env(safe-area-inset-right));
-  color:var(--teal);pointer-events:auto;cursor:pointer;border:0;line-height:1;
+  pointer-events:auto;color:var(--teal);cursor:pointer;border:0;line-height:1;
   font-size:15px;padding:6px 11px;display:inline-flex;align-items:center;gap:7px;
 }
 .chip.time::after{
@@ -269,7 +272,7 @@ canvas,svg,img{-webkit-user-drag:none;user-drag:none}
 
 /* record badge — la célébration naît sur l'objectif lui-même, en périphérie du regard */
 #recbadge{
-  position:absolute;z-index:7;top:calc(52px + env(safe-area-inset-top));left:50%;
+  position:absolute;z-index:7;top:calc(90px + env(safe-area-inset-top));left:50%;
   padding:8px 15px;border-radius:99px;pointer-events:none;opacity:0;
   background:linear-gradient(120deg,var(--amber),var(--gold));
   color:#2A1608;font-family:var(--f-display);font-size:12px;letter-spacing:.03em;
@@ -501,7 +504,7 @@ h2.title{
   <div id="timebar"><div id="timefill"></div></div>
 
   <header id="hud">
-    <button class="chip time" id="timeVal" aria-label="Temps — appuyer pour mettre en pause">60</button>
+    <div class="timepos"><button class="chip time" id="timeVal" aria-label="Temps — appuyer pour mettre en pause">60</button></div>
     <div class="chip combo" id="comboVal" hidden>×1</div>
     <div class="rulewrap">
       <div class="rule" id="ruleChip"></div>
@@ -1552,7 +1555,7 @@ function drawBigScore(dt) {
   const txt = fmt(S.score);
   const w = ctx.measureText(txt).width;
   if (w > W * 0.9) { size *= (W * 0.9) / w; ctx.font = font(size); }
-  ctx.fillStyle = effTheme() === "aube" ? "rgba(74,63,87,0.11)" : "rgba(255,243,226,0.09)";
+  ctx.fillStyle = effTheme() === "aube" ? "rgba(74,63,87,0.05)" : "rgba(255,243,226,0.05)";
   ctx.fillText(txt, W / 2, H * 0.5);
   ctx.restore();
 }
