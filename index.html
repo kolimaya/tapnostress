@@ -1770,8 +1770,10 @@ function targetOf(mode) { return save.best[mode] > 0 ? save.best[mode] : FIRST_G
    11 · FLUX DE JEU
    ══════════════════════════════════════════════════════════ */
 function measureBounds() {
-  const h = $("hud").getBoundingClientRect().height || 110;
-  bounds = { t: h + 26, l: 18 + safe.l, r: W - 18 - safe.r, b: H - 24 - safe.b };
+  // #hud couvre tout l'écran (position:absolute inset:0) : on ne peut plus
+  // déduire le haut de l'aire de jeu de sa hauteur. Dégagement fixe = zone du
+  // timer centré (~40 px) + de la consigne (~86 px), plus une marge.
+  bounds = { t: safe.t + 100, l: 18 + safe.l, r: W - 18 - safe.r, b: H - 24 - safe.b };
 }
 
 function startGame(mode) {
