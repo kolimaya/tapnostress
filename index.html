@@ -64,12 +64,12 @@
 :root[data-theme="aube"] .mode:hover{background:rgba(255,255,255,.9)}
 :root[data-theme="aube"] .rule{
   background:linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,.08));
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),inset 0 0 0 1px rgba(120,90,140,.12),0 6px 16px rgba(120,90,140,.14),0 0 24px 2px rgba(255,196,90,.38);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 6px 16px rgba(120,90,140,.14),0 0 24px 2px rgba(255,196,90,.38);
 }
-:root[data-theme="aube"] .rule.avoid{box-shadow:inset 0 1px 0 rgba(255,255,255,.95),inset 0 0 0 1px rgba(255,93,122,.5),0 8px 20px rgba(120,90,140,.16),0 0 24px 2px rgba(255,111,148,.45)}
+:root[data-theme="aube"] .rule.avoid{box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 8px 20px rgba(120,90,140,.16),0 0 24px 2px rgba(255,111,148,.45)}
 :root[data-theme="aube"] .chip{
   background:linear-gradient(180deg,rgba(255,255,255,.2),rgba(255,255,255,.07));
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),inset 0 0 0 1px rgba(120,90,140,.12),0 6px 16px rgba(120,90,140,.14);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 6px 16px rgba(120,90,140,.14);
 }
 :root[data-theme="aube"] .hint{background:rgba(47,165,148,.12)}
 :root[data-theme="aube"] .stat{background:rgba(255,255,255,.6)}
@@ -209,7 +209,7 @@ canvas,svg,img{-webkit-user-drag:none;user-drag:none}
   pointer-events:none;display:flex;align-items:center;gap:10px;
   padding:9px 15px 9px 12px;border-radius:99px;
   background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.015));
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.4),inset 0 0 0 1px rgba(255,255,255,.10),0 6px 18px rgba(0,0,0,.2),0 0 26px 2px rgba(255,213,110,.4);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 6px 18px rgba(0,0,0,.2),0 0 26px 2px rgba(255,213,110,.4);
   backdrop-filter:blur(20px) saturate(1.7);-webkit-backdrop-filter:blur(20px) saturate(1.7);
   font-weight:800;font-size:clamp(11px,2.5vw,14px);letter-spacing:.06em;text-transform:uppercase;
   white-space:nowrap;
@@ -221,7 +221,7 @@ canvas,svg,img{-webkit-user-drag:none;user-drag:none}
 .rule .tok{display:inline-flex;align-items:center;gap:6px;color:var(--cream)}
 .rule svg{width:17px;height:17px;display:block;filter:drop-shadow(0 0 8px currentColor)}
 .rule .swatch{width:12px;height:12px;border-radius:4px;box-shadow:0 0 10px currentColor,inset 0 0 0 1px rgba(0,0,0,.25);background:currentColor}
-.rule.avoid{box-shadow:inset 0 1px 0 rgba(255,255,255,.42),inset 0 0 0 1px rgba(255,93,122,.55),0 8px 22px rgba(0,0,0,.3),0 0 26px 2px rgba(255,93,122,.5)}
+.rule.avoid{box-shadow:inset 0 1px 0 rgba(255,255,255,.42),0 8px 22px rgba(0,0,0,.3),0 0 26px 2px rgba(255,93,122,.5)}
 #lvlPop{
   position:absolute;bottom:calc(100% + 7px);left:50%;
   transform:translateX(-50%) translateY(8px);
@@ -238,7 +238,7 @@ canvas,svg,img{-webkit-user-drag:none;user-drag:none}
   font-family:var(--f-data);font-weight:700;font-size:13px;letter-spacing:.04em;
   padding:5px 11px;border-radius:99px;
   background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.015));
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.38),inset 0 0 0 1px rgba(255,255,255,.10),0 6px 16px rgba(0,0,0,.18);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.38),0 6px 16px rgba(0,0,0,.18);
   backdrop-filter:blur(20px) saturate(1.7);-webkit-backdrop-filter:blur(20px) saturate(1.7);
   color:var(--cream-dim);font-variant-numeric:tabular-nums;
 }
@@ -260,7 +260,7 @@ canvas,svg,img{-webkit-user-drag:none;user-drag:none}
 .chip.time.tick{animation:timetick .36s cubic-bezier(.2,1.5,.4,1)}
 @keyframes timetick{0%{transform:scale(1);filter:none}32%{transform:scale(1.18);filter:drop-shadow(0 0 12px var(--coral))}100%{transform:scale(1);filter:none}}
 @keyframes lowpulse{0%,100%{opacity:1}50%{opacity:.45}}
-.chip.combo{position:absolute;top:calc(11px + env(safe-area-inset-top));left:calc(14px + env(safe-area-inset-left));color:var(--gold);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),inset 0 0 0 1px rgba(255,215,94,.45),0 8px 20px rgba(0,0,0,.28)}
+.chip.combo{position:absolute;top:calc(11px + env(safe-area-inset-top));left:calc(14px + env(safe-area-inset-left));color:var(--gold);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 8px 20px rgba(0,0,0,.28)}
 .chip.lvl{color:var(--amber)}
 .icon-btn{
   pointer-events:auto;width:38px;height:38px;flex:none;border:0;cursor:pointer;
