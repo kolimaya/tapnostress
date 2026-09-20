@@ -11,10 +11,11 @@ name: Build Android
 # Android ne demande NI Mac NI compte payant pour l'APK de debug : le mode
 # unsigned marche immediatement.
 #
-# LE TOUT PREMIER DEPOT SUR PLAY RESTE MANUEL. L'API Play ne sait que MODIFIER
-# une app ayant deja recu un binaire ; le premier AAB s'importe via la Play
-# Console. Ce workflow produit l'AAB signe et le conserve en artefact ; son
-# envoi automatique pourra etre ajoute ensuite.
+# TELEVERSEMENT PLAY AUTOMATIQUE. Le premier depot etait manuel (l'API Play ne
+# sait que MODIFIER une app ayant deja recu un binaire) ; c'est fait. Desormais,
+# en mode release avec canal != aucun, l'AAB signe est aussi envoye sur Play via
+# tools/play/televersement.mjs (secret PLAY_SERVICE_ACCOUNT_JSON). Statut
+# brouillon par defaut : la publication reste une decision de la Console.
 #
 # SECRETS POUR LE MODE release
 #   ANDROID_KEYSTORE_B64       le keystore .jks encode en base64 NU (pas de PEM)
@@ -37,6 +38,16 @@ on:
         type: choice
         options: [unsigned, release]
         default: unsigned
+      canal:
+        description: "Televerser l'AAB sur Play apres compilation (mode release uniquement)"
+        type: choice
+        options: [aucun, internal, alpha, beta, production]
+        default: aucun
+      statut:
+        description: "Statut de la release Play (brouillon = attend une publication manuelle)"
+        type: choice
+        options: [brouillon, complet]
+        default: brouillon
 
 concurrency:
   group: android-build
@@ -222,6 +233,28 @@ jobs:
           name: tapnostress-android-aab
           path: mobile/android/app/build/outputs/bundle/release/*.aab
           retention-days: 14
+
+      # APRES la conservation de l'artefact, deliberement : si le televersement
+      # echoue, l'AAB signe reste recuperable. Rien ne part sans canal != aucun.
+      # SECRET : PLAY_SERVICE_ACCOUNT_JSON (cle JSON du compte de service Google
+      # invite dans la Play Console). tools/play/televersement.mjs ouvre une
+      # edition, envoie l'AAB, met a jour le canal (notes lues dans
+      # mobile/play/notes-de-version.json) et valide.
+      - name: Televerser sur Play
+        if: ${{ github.event.inputs.mode == 'release' && github.event.inputs.canal != 'aucun' }}
+        env:
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          set -euo pipefail
+          if [ -z "${PLAY_SERVICE_ACCOUNT_JSON:-}" ]; then
+            echo "::error::canal=${{ github.event.inputs.canal }} demande mais le secret PLAY_SERVICE_ACCOUNT_JSON est absent."; exit 1
+          fi
+          AAB="$(find mobile/android/app/build/outputs/bundle/release -name '*.aab' | head -1)"
+          node tools/play/televersement.mjs \
+            --aab="$AAB" \
+            --canal='${{ github.event.inputs.canal }}' \
+            --statut='${{ github.event.inputs.statut }}' \
+            --appliquer
 
       - name: Nettoyer
         if: ${{ always() }}
