@@ -502,6 +502,24 @@ h2.title{
   .item{grid-template-columns:auto 1fr;grid-template-rows:auto auto}
   .item .act{grid-column:1/-1;flex-direction:row;justify-content:flex-end;align-items:center;gap:10px}
 }
+/* ===== Effet « pressoir » : tous les boutons cliquables de l'UI réagissent au
+   toucher par un écrasement vif suivi d'un rebond élastique. Les formes à taper
+   en jeu (dessinées au canvas) ne sont pas concernées. ===== */
+.btn,.play-orb,.gearbtn,.mini,.mode,.setrow,.seg,.chip.time,.foot button{
+  transition:transform .13s cubic-bezier(.34,1.6,.4,1),box-shadow .13s ease,background .13s ease,color .13s ease,filter .13s ease;
+}
+.btn:active{transform:translateY(4px) scale(.97);box-shadow:0 3px 0 #B85E17,0 8px 18px rgba(255,158,61,.3)}
+.btn.ghost:active{transform:scale(.93)}
+.play-orb:active{animation:none;transform:scale(.9)}
+.gearbtn:active{transform:scale(.84)}
+.mini:active{transform:translateY(2px) scale(.95);box-shadow:0 1px 0 #B85E17}
+.mini.sec:active{transform:scale(.93)}
+.mode:active{transform:scale(.965)}
+.setrow:active{transform:scale(.97)}
+.seg:active{transform:scale(.9)}
+.chip.time:active{transform:scale(.88)}
+.foot button:active{transform:scale(.88)}
+
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
