@@ -531,7 +531,7 @@ h2.title{
   <div id="timebar"><div id="timefill"></div></div>
 
   <header id="hud">
-    <div class="timepos"><button class="chip time" id="timeVal" aria-label="Temps — appuyer pour mettre en pause">60</button></div>
+    <div class="timepos"><button class="chip time" id="timeVal" data-i18n-aria="timeAria" aria-label="Temps — appuyer pour mettre en pause">60</button></div>
     <div class="chip combo" id="comboVal" hidden>×1</div>
     <div class="rulewrap">
       <div class="rule" id="ruleChip"></div>
@@ -542,31 +542,39 @@ h2.title{
 
   <div id="count"><b>3</b></div>
 
-  <div id="endfade"><span>Temps écoulé</span></div>
+  <div id="endfade"><span data-i18n="timeUp">Temps écoulé</span></div>
 
   <div id="veil">
     <!-- HOME -->
     <section class="screen hero on" id="s-home">
-      <button class="gearbtn" id="goSettings" aria-label="Réglages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3.1"/><path d="M12 2.6v3M12 18.4v3M2.6 12h3M18.4 12h3M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M18.8 5.2l-2.1 2.1M7.3 16.7l-2.1 2.1"/></svg></button>
+      <button class="gearbtn" id="goSettings" data-i18n-aria="settingsAria" aria-label="Réglages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3.1"/><path d="M12 2.6v3M12 18.4v3M2.6 12h3M18.4 12h3M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M18.8 5.2l-2.1 2.1M7.3 16.7l-2.1 2.1"/></svg></button>
       <div class="brand">
         <div class="mascot"><svg viewBox="0 0 100 100" aria-hidden="true"><rect x="4" y="4" width="92" height="92" rx="27" fill="var(--mascot-tile)"/><circle cx="37" cy="43" r="7" fill="var(--mascot-eyeP)"/><circle cx="63" cy="43" r="7" fill="var(--mascot-eyeB)"/><path d="M33 60 Q50 78 67 60" fill="none" stroke="var(--mascot-smile)" stroke-width="7" stroke-linecap="round"/></svg></div>
         <h1>TAP<i class="dot"></i>NO<br>STRESS</h1>
-        <p>Tape juste. Respire.</p>
+        <p data-i18n="tagline">Tape juste. Respire.</p>
       </div>
       <div class="home-play">
         <div class="playzone">
           <span class="wave"></span><span class="wave"></span><span class="wave"></span>
-          <button class="play-orb" id="goPlay">Jouer</button>
+          <button class="play-orb" id="goPlay" data-i18n="play">Jouer</button>
         </div>
       </div>
     </section>
 
     <!-- SETTINGS -->
     <section class="screen" id="s-settings">
-      <h2 class="title">Réglages</h2>
-      <p class="sub">Thème, son et tout le reste.</p>
+      <h2 class="title" data-i18n="settings">Réglages</h2>
+      <p class="sub" data-i18n="settingsSub">Thème, son et tout le reste.</p>
       <div class="themepick">
-        <div class="lb">Thème</div>
+        <div class="lb" data-i18n="langLabel">Langue</div>
+        <div class="segs" id="langSegs">
+          <button class="seg" data-lang-opt="fr">Français</button>
+          <button class="seg" data-lang-opt="en">English</button>
+          <button class="seg" data-lang-opt="auto">Auto</button>
+        </div>
+      </div>
+      <div class="themepick">
+        <div class="lb" data-i18n="themeLabel">Thème</div>
         <div class="segs" id="themeSegs">
           <button class="seg" data-theme-opt="aube">☀ Aube</button>
           <button class="seg" data-theme-opt="crepuscule">☾ Crépuscule</button>
@@ -574,55 +582,55 @@ h2.title{
         </div>
       </div>
       <div class="setlist">
-        <button class="setrow" id="setSound"><span class="ic">♪</span><span class="tx"><b>Son</b><span>Effets &amp; ambiance</span></span><span class="switch" id="swSound"></span></button>
-        <button class="setrow" id="setHaptics"><span class="ic">≋</span><span class="tx"><b>Vibrations</b><span>Retour haptique</span></span><span class="switch" id="swHaptics"></span></button>
-        <button class="setrow" id="setShop"><span class="ic">◈</span><span class="tx"><b>Boutique</b><span>Formes &amp; décors</span></span><span class="chev">›</span></button>
-        <button class="setrow" id="setModes"><span class="ic">★</span><span class="tx"><b>Meilleurs scores</b><span>Suivis par mode</span></span><span class="chev">›</span></button>
-        <button class="setrow" id="setHow"><span class="ic">?</span><span class="tx"><b>Comment jouer</b></span><span class="chev">›</span></button>
-        <button class="setrow" id="setWipe"><span class="ic">⟲</span><span class="tx"><b>Réinitialiser</b><span>Efface records, éclats &amp; achats</span></span><span class="chev">›</span></button>
+        <button class="setrow" id="setSound"><span class="ic">♪</span><span class="tx"><b data-i18n="soundTitle">Son</b><span data-i18n="soundSub">Effets &amp; ambiance</span></span><span class="switch" id="swSound"></span></button>
+        <button class="setrow" id="setHaptics"><span class="ic">≋</span><span class="tx"><b data-i18n="hapticsTitle">Vibrations</b><span data-i18n="hapticsSub">Retour haptique</span></span><span class="switch" id="swHaptics"></span></button>
+        <button class="setrow" id="setShop"><span class="ic">◈</span><span class="tx"><b data-i18n="shopRow">Boutique</b><span data-i18n="shopRowSub">Formes &amp; décors</span></span><span class="chev">›</span></button>
+        <button class="setrow" id="setModes"><span class="ic">★</span><span class="tx"><b data-i18n="scoresTitle">Meilleurs scores</b><span data-i18n="scoresSub">Suivis par mode</span></span><span class="chev">›</span></button>
+        <button class="setrow" id="setHow"><span class="ic">?</span><span class="tx"><b data-i18n="howToPlay">Comment jouer</b></span><span class="chev">›</span></button>
+        <button class="setrow" id="setWipe"><span class="ic">⟲</span><span class="tx"><b data-i18n="resetTitle">Réinitialiser</b><span data-i18n="resetSub">Efface records, éclats &amp; achats</span></span><span class="chev">›</span></button>
       </div>
-      <button class="btn ghost" data-back="s-home" style="margin-top:14px">← Retour</button>
+      <button class="btn ghost" data-back="s-home" data-i18n="back" style="margin-top:14px">← Retour</button>
     </section>
 
     <!-- MODES -->
     <section class="screen" id="s-modes">
-      <h2 class="title">Choisis ton régime</h2>
-      <p class="sub">Quatre façons de lire les formes. Ton record est suivi séparément dans chaque mode.</p>
+      <h2 class="title" data-i18n="modesTitle">Choisis ton régime</h2>
+      <p class="sub" data-i18n="modesSub">Quatre façons de lire les formes. Ton record est suivi séparément dans chaque mode.</p>
       <div class="modes" id="modeList"></div>
-      <button class="btn ghost" data-back="s-home">← Retour</button>
+      <button class="btn ghost" data-back="s-home" data-i18n="back">← Retour</button>
     </section>
 
     <!-- HOW -->
     <section class="screen" id="s-how">
-      <h2 class="title">Comment jouer</h2>
-      <p class="sub">Une consigne s'affiche en haut. Tape uniquement les formes qui y répondent — la couleur compte autant que la forme.</p>
+      <h2 class="title" data-i18n="howToPlay">Comment jouer</h2>
+      <p class="sub" data-i18n="howSub">Une consigne s'affiche en haut. Tape uniquement les formes qui y répondent — la couleur compte autant que la forme.</p>
       <div class="card">
-        <div class="hint" style="margin-top:0"><b>La consigne change.</b> Elle se durcit à chaque palier : d'abord la forme seule, puis la couleur seule, puis les deux, et parfois à l'envers (« tout sauf »).</div>
-        <div class="hint"><b>Tout n'est pas cliquable.</b> Les intrus ne répondent pas à la consigne. À partir du palier 4, des formes <i>scellées</i> apparaissent : cerclées de pointillés, elles sont interdites même si elles collent à la consigne.</div>
-        <div class="hint"><b>La chaîne paie.</b> Chaque touche juste enchaînée gonfle le multiplicateur jusqu'à ×3. Une erreur la brise net.</div>
-        <div class="hint"><b>Les formes dorées</b> se tapent toujours et rendent du temps.</div>
-        <div class="hint"><b>En Classique</b>, une seule forme est à l'écran à la fois, et elle s'efface de plus en plus vite. Elle reste visible tant qu'elle est frappable : c'est du réflexe, jamais de la devinette. Si elle ne répond pas à la consigne, ne frappe pas — laisse-la filer.</div>
-        <button class="btn ghost" data-back="s-home" style="margin-top:14px">← Retour</button>
+        <div class="hint" style="margin-top:0" data-i18n-html="hint1"><b>La consigne change.</b> Elle se durcit à chaque palier : d'abord la forme seule, puis la couleur seule, puis les deux, et parfois à l'envers (« tout sauf »).</div>
+        <div class="hint" data-i18n-html="hint2"><b>Tout n'est pas cliquable.</b> Les intrus ne répondent pas à la consigne. À partir du palier 4, des formes <i>scellées</i> apparaissent : cerclées de pointillés, elles sont interdites même si elles collent à la consigne.</div>
+        <div class="hint" data-i18n-html="hint3"><b>La chaîne paie.</b> Chaque touche juste enchaînée gonfle le multiplicateur jusqu'à ×3. Une erreur la brise net.</div>
+        <div class="hint" data-i18n-html="hint4"><b>Les formes dorées</b> se tapent toujours et rendent du temps.</div>
+        <div class="hint" data-i18n-html="hint5"><b>En Classique</b>, une seule forme est à l'écran à la fois, et elle s'efface de plus en plus vite. Elle reste visible tant qu'elle est frappable : c'est du réflexe, jamais de la devinette. Si elle ne répond pas à la consigne, ne frappe pas — laisse-la filer.</div>
+        <button class="btn ghost" data-back="s-home" data-i18n="back" style="margin-top:14px">← Retour</button>
       </div>
     </section>
 
     <!-- SHOP -->
     <section class="screen" id="s-shop">
-      <h2 class="title">Boutique</h2>
-      <p class="sub">Les éclats se gagnent en jouant. Habille tes formes, change de décor — le jeu ne change pas, le plaisir si.</p>
+      <h2 class="title" data-i18n="shopTitle">Boutique</h2>
+      <p class="sub" data-i18n="shopSub">Les éclats se gagnent en jouant. Habille tes formes, change de décor — le jeu ne change pas, le plaisir si.</p>
       <div class="wallet">
-        <span class="lbl">Tes éclats</span>
+        <span class="lbl" data-i18n="yourSparks">Tes éclats</span>
         <span class="amt"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 6.2L21 10l-5.1 4.2L17.4 21 12 17.4 6.6 21l1.5-6.8L3 10l6.6-1.8z"/></svg><span id="coinAmt">0</span></span>
       </div>
       <div class="shop-sec">
-        <h3>Packs de formes</h3>
+        <h3 data-i18n="shapePacks">Packs de formes</h3>
         <div class="items" id="shopShapes"></div>
       </div>
       <div class="shop-sec">
-        <h3>Décors</h3>
+        <h3 data-i18n="decorsLabel">Décors</h3>
         <div class="items" id="shopDecors"></div>
       </div>
-      <button class="btn ghost" data-back="s-home">← Retour</button>
+      <button class="btn ghost" data-back="s-home" data-i18n="back">← Retour</button>
     </section>
 
     <!-- PAUSE -->
@@ -630,18 +638,18 @@ h2.title{
       <div class="brand">
         <div class="mascot"><svg viewBox="0 0 100 100" aria-hidden="true"><rect x="4" y="4" width="92" height="92" rx="27" fill="var(--mascot-tile)"/><circle cx="37" cy="43" r="7" fill="var(--mascot-eyeP)"/><circle cx="63" cy="43" r="7" fill="var(--mascot-eyeB)"/><path d="M33 60 Q50 78 67 60" fill="none" stroke="var(--mascot-smile)" stroke-width="7" stroke-linecap="round"/></svg></div>
         <h1>PAUSE</h1>
-        <p>Le chrono t'attend.</p>
+        <p data-i18n="pauseSub">Le chrono t'attend.</p>
       </div>
       <div class="home-play">
         <div class="playzone">
           <span class="wave"></span><span class="wave"></span><span class="wave"></span>
-          <button class="play-orb" id="resume">Reprendre</button>
+          <button class="play-orb" id="resume" data-i18n="resume">Reprendre</button>
         </div>
       </div>
       <div class="foot">
-        <button id="restart">Recommencer</button>
+        <button id="restart" data-i18n="restart">Recommencer</button>
         <span class="dot"></span>
-        <button id="quit">Quitter</button>
+        <button id="quit" data-i18n="quit">Quitter</button>
       </div>
     </section>
 
@@ -656,16 +664,16 @@ h2.title{
       <div class="home-play">
         <div class="playzone">
           <span class="wave"></span><span class="wave"></span><span class="wave"></span>
-          <button class="play-orb" id="again">REJOUER</button>
+          <button class="play-orb" id="again" data-i18n="replay">REJOUER</button>
         </div>
       </div>
       <div class="over-foot">
         <div class="stats" id="finalStats"></div>
         <div class="earn"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 6.2L21 10l-5.1 4.2L17.4 21 12 17.4 6.6 21l1.5-6.8L3 10l6.6-1.8z"/></svg><span id="finalCoins">+0 éclats</span></div>
         <div class="foot">
-          <button id="overModes">Autre mode</button>
+          <button id="overModes" data-i18n="otherMode">Autre mode</button>
           <span class="dot"></span>
-          <button id="overShop">Boutique</button>
+          <button id="overShop" data-i18n="shopWord">Boutique</button>
         </div>
       </div>
     </section>
@@ -703,62 +711,176 @@ const hpt = (() => {
 })();
 
 const SHAPES = ["circle", "square", "triangle"];
-const SHAPE_FR = { circle: "CERCLES", square: "CARRÉS", triangle: "TRIANGLES" };
 
-const COLOR_FR = ["ROUGE", "AMBRE", "ÉMERAUDE", "AZUR", "VIOLET", "ROSE"];
+/* ══════════════════════════════════════════════════════════
+   0·bis — INTERNATIONALISATION (FR / EN, détection auto de l'appareil)
+   La langue « auto » suit celle de l'appareil ; sinon, choix manuel.
+   ══════════════════════════════════════════════════════════ */
+let LANG = "fr";
+const detectLang = () => {
+  const l = ((navigator.languages && navigator.languages[0]) || navigator.language || "en").toLowerCase();
+  return l.startsWith("fr") ? "fr" : "en";
+};
+const effLang = () => (typeof save !== "undefined" && (save.lang === "fr" || save.lang === "en")) ? save.lang : detectLang();
+function refreshLang() { LANG = effLang(); document.documentElement.lang = LANG; }
+
+const SHAPE_NAMES = {
+  fr: { circle: "CERCLES", square: "CARRÉS", triangle: "TRIANGLES" },
+  en: { circle: "CIRCLES", square: "SQUARES", triangle: "TRIANGLES" }
+};
+const COLOR_NAMES = {
+  fr: ["ROUGE", "AMBRE", "ÉMERAUDE", "AZUR", "VIOLET", "ROSE"],
+  en: ["RED", "AMBER", "EMERALD", "AZURE", "VIOLET", "PINK"]
+};
+const PRAISE_L = {
+  fr: ["BRAVO !", "MAGNIFIQUE !", "SUPERBE !", "QUEL ŒIL !", "PARFAIT !", "ÇA BRILLE !", "TU ASSURES !", "ÉCLATANT !", "IMPECCABLE !", "BEAU GESTE !", "CHAPEAU !", "OH OUI !"],
+  en: ["NICE!", "BRILLIANT!", "SUPERB!", "SHARP EYE!", "PERFECT!", "IT SHINES!", "YOU GOT IT!", "DAZZLING!", "FLAWLESS!", "GREAT MOVE!", "HATS OFF!", "OH YES!"]
+};
+const PRAISE_HOT_L = {
+  fr: ["EN FEU !", "INARRÊTABLE !", "TU VOLES !", "LÉGENDAIRE !", "PHÉNOMÉNAL !", "INTOUCHABLE !"],
+  en: ["ON FIRE!", "UNSTOPPABLE!", "YOU'RE FLYING!", "LEGENDARY!", "PHENOMENAL!", "UNTOUCHABLE!"]
+};
+
+const T = {
+  fr: {
+    tagline: "Tape juste. Respire.", play: "Jouer",
+    settings: "Réglages", settingsSub: "Thème, son et tout le reste.",
+    themeLabel: "Thème", langLabel: "Langue",
+    soundTitle: "Son", soundSub: "Effets & ambiance",
+    hapticsTitle: "Vibrations", hapticsSub: "Retour haptique",
+    shopRow: "Boutique", shopRowSub: "Formes & décors",
+    scoresTitle: "Meilleurs scores", scoresSub: "Suivis par mode",
+    howToPlay: "Comment jouer",
+    resetTitle: "Réinitialiser", resetSub: "Efface records, éclats & achats",
+    back: "← Retour",
+    modesTitle: "Choisis ton régime", modesSub: "Quatre façons de lire les formes. Ton record est suivi séparément dans chaque mode.",
+    howSub: "Une consigne s'affiche en haut. Tape uniquement les formes qui y répondent — la couleur compte autant que la forme.",
+    hint1: "<b>La consigne change.</b> Elle se durcit à chaque palier : d'abord la forme seule, puis la couleur seule, puis les deux, et parfois à l'envers (« tout sauf »).",
+    hint2: "<b>Tout n'est pas cliquable.</b> Les intrus ne répondent pas à la consigne. À partir du palier 4, des formes <i>scellées</i> apparaissent : cerclées de pointillés, elles sont interdites même si elles collent à la consigne.",
+    hint3: "<b>La chaîne paie.</b> Chaque touche juste enchaînée gonfle le multiplicateur jusqu'à ×3. Une erreur la brise net.",
+    hint4: "<b>Les formes dorées</b> se tapent toujours et rendent du temps.",
+    hint5: "<b>En Classique</b>, une seule forme est à l'écran à la fois, et elle s'efface de plus en plus vite. Elle reste visible tant qu'elle est frappable : c'est du réflexe, jamais de la devinette. Si elle ne répond pas à la consigne, ne frappe pas — laisse-la filer.",
+    shopTitle: "Boutique", shopSub: "Les éclats se gagnent en jouant. Habille tes formes, change de décor — le jeu ne change pas, le plaisir si.",
+    yourSparks: "Tes éclats", shapePacks: "Packs de formes", decorsLabel: "Décors",
+    pauseSub: "Le chrono t'attend.", resume: "Reprendre", restart: "Recommencer", quit: "Quitter",
+    replay: "REJOUER", otherMode: "Autre mode", shopWord: "Boutique",
+    timeUp: "Temps écoulé", timeAria: "Temps — appuyer pour mettre en pause", settingsAria: "Réglages",
+    verbShape: "Tape les", verbColor: "Tape tout ce qui est", verbShapeColor: "Tape les",
+    verbNotShape: "Tout sauf les", verbNotColor: "Tout sauf le",
+    tooSlow: "TROP LENT", nice: "BIEN VU", gift: "CADEAU !",
+    sealed: "SCELLÉE", notThatOne: "PAS CELLE-LÀ",
+    chain: "CHAÎNE", chainBroken: "CHAÎNE BRISÉE",
+    recordBeaten: "★ RECORD BATTU ★", goalReached: "★ OBJECTIF FRANCHI ★",
+    level: "PALIER", go: "GO !",
+    newRecord: "Nouveau record", score: "Score",
+    firstRecord: "PREMIER RECORD POSÉ",
+    youBeat: n => `TU AS BATTU ${n}`,
+    missMsg: (rec, short) => `Record à battre : ${rec} — il te manquait ${short}`,
+    tapToSetRecord: "Tape au moins une forme pour poser ton premier record",
+    hits: "Touches", accuracy: "Précision", bestChain: "Chaîne max", palier: "Palier",
+    sparks: "éclats", recordLabel: "Record",
+    equipped: "Équipé", equip: "Équiper", buy: "Acheter", missShort: n => "Il te manque " + n
+  },
+  en: {
+    tagline: "Tap right. Breathe.", play: "Play",
+    settings: "Settings", settingsSub: "Theme, sound and everything else.",
+    themeLabel: "Theme", langLabel: "Language",
+    soundTitle: "Sound", soundSub: "Effects & ambience",
+    hapticsTitle: "Vibration", hapticsSub: "Haptic feedback",
+    shopRow: "Shop", shopRowSub: "Shapes & backdrops",
+    scoresTitle: "Best scores", scoresSub: "Tracked per mode",
+    howToPlay: "How to play",
+    resetTitle: "Reset", resetSub: "Erases records, sparks & purchases",
+    back: "← Back",
+    modesTitle: "Choose your mode", modesSub: "Four ways to read the shapes. Your best is tracked separately in each mode.",
+    howSub: "A rule appears at the top. Tap only the shapes that match it — color counts as much as shape.",
+    hint1: "<b>The rule changes.</b> It tightens each level: first shape only, then color only, then both, and sometimes reversed (“anything but”).",
+    hint2: "<b>Not everything is tappable.</b> Decoys don't match the rule. From level 4, <i>sealed</i> shapes appear: ringed with dashes, they're off-limits even if they fit the rule.",
+    hint3: "<b>Chains pay off.</b> Each hit in a row grows your multiplier up to ×3. One mistake breaks it.",
+    hint4: "<b>Golden shapes</b> can always be tapped and give back time.",
+    hint5: "<b>In Classic</b>, one shape shows at a time, fading faster and faster. It stays visible while it's tappable: pure reflex, never guesswork. If it doesn't match the rule, don't tap — let it go.",
+    shopTitle: "Shop", shopSub: "Sparks are earned by playing. Dress up your shapes, change the backdrop — the game stays the same, the fun grows.",
+    yourSparks: "Your sparks", shapePacks: "Shape packs", decorsLabel: "Backdrops",
+    pauseSub: "The clock is waiting.", resume: "Resume", restart: "Restart", quit: "Quit",
+    replay: "PLAY AGAIN", otherMode: "Other mode", shopWord: "Shop",
+    timeUp: "Time's up", timeAria: "Time — tap to pause", settingsAria: "Settings",
+    verbShape: "Tap the", verbColor: "Tap anything", verbShapeColor: "Tap the",
+    verbNotShape: "Anything but", verbNotColor: "Anything but",
+    tooSlow: "TOO SLOW", nice: "NICE", gift: "GIFT!",
+    sealed: "SEALED", notThatOne: "NOT THAT ONE",
+    chain: "CHAIN", chainBroken: "CHAIN BROKEN",
+    recordBeaten: "★ RECORD BEATEN ★", goalReached: "★ GOAL REACHED ★",
+    level: "LEVEL", go: "GO!",
+    newRecord: "New record", score: "Score",
+    firstRecord: "FIRST RECORD SET",
+    youBeat: n => `YOU BEAT ${n}`,
+    missMsg: (rec, short) => `Record to beat: ${rec} — you were ${short} short`,
+    tapToSetRecord: "Tap at least one shape to set your first record",
+    hits: "Hits", accuracy: "Accuracy", bestChain: "Best chain", palier: "Level",
+    sparks: "sparks", recordLabel: "Best",
+    equipped: "Equipped", equip: "Equip", buy: "Buy", missShort: n => n + " more to go"
+  }
+};
+const t = k => { const v = T[LANG] && T[LANG][k]; return v !== undefined ? v : (T.fr[k] !== undefined ? T.fr[k] : k); };
+const tl = o => o && (o[LANG] !== undefined ? o[LANG] : o.fr);
+function applyStatic() {
+  document.querySelectorAll("[data-i18n]").forEach(e => { e.textContent = t(e.dataset.i18n); });
+  document.querySelectorAll("[data-i18n-html]").forEach(e => { e.innerHTML = t(e.dataset.i18nHtml); });
+  document.querySelectorAll("[data-i18n-aria]").forEach(e => { e.setAttribute("aria-label", t(e.dataset.i18nAria)); });
+}
 
 const PACKS = {
   classique: {
-    name: "Studio Classique", price: 0,
-    desc: "Aplats pleins, ombre douce, éclat de verre.",
+    name: { fr: "Studio Classique", en: "Classic Studio" }, price: 0,
+    desc: { fr: "Aplats pleins, ombre douce, éclat de verre.", en: "Solid fills, soft shadow, glassy shine." },
     colors: ["#FF4D5E", "#FFB03A", "#3FD68C", "#48A8FF", "#A96BFF", "#FF6FD8"]
   },
   neon: {
-    name: "Néon Nocturne", price: 650,
-    desc: "Contours lumineux et halo électrique.",
+    name: { fr: "Néon Nocturne", en: "Night Neon" }, price: 650,
+    desc: { fr: "Contours lumineux et halo électrique.", en: "Glowing outlines and electric halo." },
     colors: ["#FF3D6E", "#FFC53D", "#37F2A8", "#3FC8FF", "#B67CFF", "#FF6BE6"]
   },
   papier: {
-    name: "Papier Découpé", price: 1100,
-    desc: "Pastels mats, ombre portée, grain de papier.",
+    name: { fr: "Papier Découpé", en: "Cut Paper" }, price: 1100,
+    desc: { fr: "Pastels mats, ombre portée, grain de papier.", en: "Matte pastels, drop shadow, paper grain." },
     colors: ["#F2705F", "#F2B33D", "#5FBF8A", "#5A9BD8", "#9B7BD4", "#E58CB8"]
   }
 };
 
 const DECORS = {
-  foire:    { name: "Foire Nocturne", price: 0,    desc: "Lampions flous et poussière d'or en suspension." },
-  aurore:   { name: "Aurore Boréale", price: 800,  desc: "Voiles polaires, ciel piqué d'étoiles." },
-  couchant: { name: "Rétro Couchant", price: 1300, desc: "Soleil strié et grille en fuite." }
+  foire:    { name: { fr: "Foire Nocturne", en: "Night Fair" },     price: 0,    desc: { fr: "Lampions flous et poussière d'or en suspension.", en: "Blurred lanterns and floating gold dust." } },
+  aurore:   { name: { fr: "Aurore Boréale", en: "Northern Lights" }, price: 800,  desc: { fr: "Voiles polaires, ciel piqué d'étoiles.", en: "Polar veils, a sky pricked with stars." } },
+  couchant: { name: { fr: "Rétro Couchant", en: "Retro Sunset" },    price: 1300, desc: { fr: "Soleil strié et grille en fuite.", en: "Striped sun and vanishing grid." } }
 };
 
 const MODES = {
   zen: {
-    name: "Zen", color: "#5AD3D1",
-    desc: "90 s, aucune sanction. Le jeu respire, tu apprends à lire les couleurs.",
+    name: { fr: "Zen", en: "Zen" }, color: "#5AD3D1",
+    desc: { fr: "90 s, aucune sanction. Le jeu respire, tu apprends à lire les couleurs.", en: "90s, no penalty. The game breathes while you learn to read colors." },
     time: 90, spawn0: 1250, spawnMin: 560, life0: 3400, lifeMin: 1600,
     decoyMax: 0.40, levelEvery: 16000, penaltyTime: 0, penaltyScore: 0,
     colors0: 2, maxLevel: 7, locks: false, missBreaks: false,
     glyph: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 14c3-4 6-4 9 0s6 4 9 0"/><path d="M3 8c3-4 6-4 9 0s6 4 9 0"/></svg>'
   },
   stress: {
-    name: "Rush", color: "#FF5E7A",
-    desc: "60 s qui fondent. Chaque erreur coûte 1,5 s. Ça va vite, très vite.",
+    name: { fr: "Rush", en: "Rush" }, color: "#FF5E7A",
+    desc: { fr: "60 s qui fondent. Chaque erreur coûte 1,5 s. Ça va vite, très vite.", en: "60s that melt away. Every mistake costs 1.5s. Fast, very fast." },
     time: 60, spawn0: 900, spawnMin: 300, life0: 2300, lifeMin: 850,
     decoyMax: 0.58, levelEvery: 11000, penaltyTime: 1500, penaltyScore: 0,
     colors0: 3, maxLevel: 10, locks: true, missBreaks: true,
     glyph: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4.5 13.5H11L10 22l8.5-11.5H12z"/></svg>'
   },
   maitrise: {
-    name: "Maîtrise", color: "#FF9E3D",
-    desc: "80 s de consignes retorses, renversées, et de formes scellées. La lecture prime sur les réflexes.",
+    name: { fr: "Maîtrise", en: "Mastery" }, color: "#FF9E3D",
+    desc: { fr: "80 s de consignes retorses, renversées, et de formes scellées. La lecture prime sur les réflexes.", en: "80s of twisted, reversed rules and sealed shapes. Reading beats reflexes." },
     time: 80, spawn0: 1050, spawnMin: 400, life0: 2700, lifeMin: 1050,
     decoyMax: 0.68, levelEvery: 13000, penaltyTime: 1000, penaltyScore: 150,
     colors0: 3, maxLevel: 9, locks: true, missBreaks: true, tricky: true,
     glyph: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>'
   },
   classic: {
-    name: "Classique", color: "#A96BFF",
-    desc: "Un clignotement continu : une forme, puis la suivante, de plus en plus vite. Du réflexe à l'état pur.",
+    name: { fr: "Classique", en: "Classic" }, color: "#A96BFF",
+    desc: { fr: "Un clignotement continu : une forme, puis la suivante, de plus en plus vite. Du réflexe à l'état pur.", en: "A steady blink: one shape, then the next, faster and faster. Pure reflex." },
     time: 70, spawn0: 900, spawnMin: 400, life0: 880, lifeMin: 540,
     gap0: 150, gapMin: 60, gapDecay: .86, lifeDecay: .90,
     popIn: 60, grace: 1.2, solo: true,
@@ -769,8 +891,6 @@ const MODES = {
   }
 };
 
-const PRAISE = ["BRAVO !", "MAGNIFIQUE !", "SUPERBE !", "QUEL ŒIL !", "PARFAIT !", "ÇA BRILLE !", "TU ASSURES !", "ÉCLATANT !", "IMPECCABLE !", "BEAU GESTE !", "CHAPEAU !", "OH OUI !"];
-const PRAISE_HOT = ["EN FEU !", "INARRÊTABLE !", "TU VOLES !", "LÉGENDAIRE !", "PHÉNOMÉNAL !", "INTOUCHABLE !"];
 
 /* ══════════════════════════════════════════════════════════
    1 · SAUVEGARDE
@@ -780,7 +900,7 @@ const KEY = "tapnostress.v1";
 // survivent au renommage. Elles ne sont jamais effacées.
 const LEGACY_KEYS = ["zolka.v1", "eclat.arcade.v1"];
 const DEFAULT_SAVE = {
-  coins: 250, sound: true, haptics: true, theme: "auto", seen: true,
+  coins: 250, sound: true, haptics: true, theme: "auto", lang: "auto", seen: true,
   best: { zen: 0, stress: 0, maitrise: 0, classic: 0 },
   owned: { shapes: ["classique"], decors: ["foire", "couchant"] },
   equip: { shapes: "classique", decors: "couchant" }
@@ -799,6 +919,7 @@ function load() {
       sound: s.sound !== false,
       haptics: s.haptics !== false,
       theme: ["auto", "aube", "crepuscule"].includes(s.theme) ? s.theme : "auto",
+      lang: ["auto", "fr", "en"].includes(s.lang) ? s.lang : "auto",
       seen: true,
       best: Object.assign(d.best, s.best || {}),
       owned: {
@@ -1261,14 +1382,14 @@ function renderRule() {
   // L'icône ne prend une couleur que si la couleur fait partie de la consigne :
   // la teinter sur une règle « forme seule » ferait croire à un critère qui n'existe pas.
   const tint = r.kind === "shapeColor" ? col : "var(--cream)";
-  const shp = `<span class="tok" style="color:${tint}">${ICONS[r.shape]}</span><span class="tok">${SHAPE_FR[r.shape]}</span>`;
-  const clr = `<span class="tok" style="color:${col}"><i class="swatch"></i></span><span class="tok">${COLOR_FR[r.color]}</span>`;
+  const shp = `<span class="tok" style="color:${tint}">${ICONS[r.shape]}</span><span class="tok">${SHAPE_NAMES[LANG][r.shape]}</span>`;
+  const clr = `<span class="tok" style="color:${col}"><i class="swatch"></i></span><span class="tok">${COLOR_NAMES[LANG][r.color]}</span>`;
   let html, avoid = false;
-  if (r.kind === "shape") html = `<span class="verb">Tape les</span>${shp}`;
-  else if (r.kind === "color") html = `<span class="verb">Tape tout ce qui est</span>${clr}`;
-  else if (r.kind === "shapeColor") html = `<span class="verb">Tape les</span>${shp}${clr}`;
-  else if (r.kind === "notShape") { html = `<span class="verb">Tout sauf les</span>${shp}`; avoid = true; }
-  else { html = `<span class="verb">Tout sauf le</span>${clr}`; avoid = true; }
+  if (r.kind === "shape") html = `<span class="verb">${t("verbShape")}</span>${shp}`;
+  else if (r.kind === "color") html = `<span class="verb">${t("verbColor")}</span>${clr}`;
+  else if (r.kind === "shapeColor") html = `<span class="verb">${t("verbShapeColor")}</span>${shp}${clr}`;
+  else if (r.kind === "notShape") { html = `<span class="verb">${t("verbNotShape")}</span>${shp}`; avoid = true; }
+  else { html = `<span class="verb">${t("verbNotColor")}</span>${clr}`; avoid = true; }
   el.className = "rule" + (avoid ? " avoid" : "");
   el.innerHTML = html;
   showRule();
@@ -1420,8 +1541,8 @@ function update(dt) {
       if (missed && cfg().missBreaks && S.combo > 0) breakCombo();
       if (cfg().solo && !s.bonus) {
         // Une seule forme à la fois : chaque décision mérite sa réponse.
-        if (missed) float(s.x, s.y - s.r - 12, "TROP LENT", "#FF6F7E", 16, "body");
-        else float(s.x, s.y, "BIEN VU", "#5AD3D1", 15, "body");
+        if (missed) float(s.x, s.y - s.r - 12, t("tooSlow"), "#FF6F7E", 16, "body");
+        else float(s.x, s.y, t("nice"), "#5AD3D1", 15, "body");
       }
     }
   }
@@ -1473,8 +1594,8 @@ function tap(x, y) {
     S.score += 200;
     pop(s, "#FFD75E"); burst(s.x, s.y, "#FFD75E", 1.2);
     ring(s.x, s.y, "#FFD75E", s.r * .5, s.r * 3.4, 560);
-    float(s.x, s.y - s.r - 12, "+2,5 s", "#FFD75E", 22);
-    float(s.x, s.y + 6, "CADEAU !", "#FFF3E2", 15);
+    float(s.x, s.y - s.r - 12, "+" + dec(2.5) + " s", "#FFD75E", 22);
+    float(s.x, s.y + 6, t("gift"), "#FFF3E2", 15);
     Sound.bonus(); hpt("bonus"); S.shake = RM ? 0 : 7; S.flash = .35; S.flashCol = "#FFD75E";
     bump(); return;
   }
@@ -1488,9 +1609,9 @@ function tap(x, y) {
     if (m.penaltyScore) S.score = Math.max(0, S.score - m.penaltyScore);
     pop(s, "#FF4D5E");
     ring(s.x, s.y, "#FF4D5E", s.r * .4, s.r * 2, 380);
-    const why = s.locked ? "SCELLÉE" : "PAS CELLE-LÀ";
+    const why = s.locked ? t("sealed") : t("notThatOne");
     float(s.x, s.y - s.r - 10, why, "#FF6F7E", 15);
-    if (m.penaltyTime) float(s.x, s.y + 8, "−" + (m.penaltyTime / 1000).toFixed(1).replace(".", ",") + " s", "#FF4D5E", 17);
+    if (m.penaltyTime) float(s.x, s.y + 8, "−" + dec(m.penaltyTime / 1000) + " s", "#FF4D5E", 17);
     else if (m.penaltyScore) float(s.x, s.y + 8, "−" + m.penaltyScore, "#FF4D5E", 17);
     Sound.err(); hpt("err"); S.shake = RM ? 0 : 12; S.flash = .5; S.flashCol = "#FF4D5E";
     breakCombo();
@@ -1511,9 +1632,9 @@ function tap(x, y) {
   ring(s.x, s.y, col, s.r * .45, s.r * (1.8 + power * .8), 460);
   if (S.combo >= 4) ring(s.x, s.y, "#FFD75E", s.r * .3, s.r * (2.4 + power * .8), 620);
   float(s.x, s.y + 4, "+" + gain, "#FFF3E2", 22);
-  const word = S.combo >= 8 ? pick(PRAISE_HOT) : pick(PRAISE);
+  const word = S.combo >= 8 ? pick(PRAISE_HOT_L[LANG]) : pick(PRAISE_L[LANG]);
   float(s.x, s.y - s.r - 14, word, S.combo >= 8 ? "#FFD75E" : col, S.combo >= 8 ? 21 : 17);
-  if (S.combo > 0 && S.combo % 5 === 0) float(W / 2, bounds.b - 70, "CHAÎNE ×" + S.combo, "#FF9E3D", 30);
+  if (S.combo > 0 && S.combo % 5 === 0) float(W / 2, bounds.b - 70, t("chain") + " ×" + S.combo, "#FF9E3D", 30);
   Sound.hit(S.combo); hpt("hit");
   S.shake = RM ? 0 : 4 + power * 2; S.flash = .18; S.flashCol = col;
   bump();
@@ -1523,7 +1644,7 @@ function tap(x, y) {
 }
 
 function breakCombo() {
-  if (S.combo >= 3) float(W / 2, bounds.b - 70, "CHAÎNE BRISÉE", "#FF6F7E", 20);
+  if (S.combo >= 3) float(W / 2, bounds.b - 70, t("chainBroken"), "#FF6F7E", 20);
   S.combo = 0;
 }
 
@@ -1534,7 +1655,7 @@ function bump() {
 function celebrateRecord() {
   S.beaten = true;
   const b = $("recbadge");
-  b.textContent = save.best[S.mode] > 0 ? "★ RECORD BATTU ★" : "★ OBJECTIF FRANCHI ★";
+  b.textContent = save.best[S.mode] > 0 ? t("recordBeaten") : t("goalReached");
   b.classList.remove("show"); void b.offsetWidth; b.classList.add("show");
   Sound.record();
   // gerbe d'étincelles depuis le rail, en périphérie : on célèbre sans voler l'attention
@@ -1759,12 +1880,13 @@ function drawRipples(dt) {
    10 · HUD
    ══════════════════════════════════════════════════════════ */
 const $ = id => document.getElementById(id);
-const fmt = n => Math.round(n).toLocaleString("fr-FR");
+const fmt = n => Math.round(n).toLocaleString(LANG === "en" ? "en-US" : "fr-FR");
+const dec = n => n.toLocaleString(LANG === "en" ? "en-US" : "fr-FR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
 let lvlPopT = null;
 function showLvlPop(lvl) {
   const el = $("lvlPop");
-  el.textContent = "PALIER " + lvl;
+  el.textContent = t("level") + " " + lvl;
   el.classList.remove("on"); void el.offsetWidth; el.classList.add("on");
   clearTimeout(lvlPopT);
   lvlPopT = setTimeout(() => el.classList.remove("on"), 1400);
@@ -1829,7 +1951,7 @@ function startGame(mode) {
   hideVeil();
   $("hud").classList.add("on");
 
-  armCountdown(2600, ["3", "2", "1", "GO !"]);
+  armCountdown(2600, ["3", "2", "1", t("go")]);
 }
 
 function armCountdown(ms, seq) {
@@ -1864,7 +1986,7 @@ function pauseGame() {
 }
 function resumeGame() {
   hideVeil();
-  armCountdown(1300, ["1", "GO !"]);
+  armCountdown(1300, ["1", t("go")]);
 }
 
 function endGame() {
@@ -1884,18 +2006,18 @@ function endGame() {
 
   const acc = S.taps ? Math.round(S.hits / S.taps * 100) : 0;
   $("finalWrap").classList.toggle("record", isRecord);
-  $("finalCap").textContent = isRecord ? "Nouveau record · " + MODES[S.mode].name : "Score · " + MODES[S.mode].name;
+  $("finalCap").textContent = (isRecord ? t("newRecord") : t("score")) + " · " + tl(MODES[S.mode].name);
   $("finalScore").textContent = fmt(S.score);
   $("finalRibbon").innerHTML = isRecord
-    ? `<span class="ribbon">★ ${prev > 0 ? "TU AS BATTU " + fmt(prev) : "PREMIER RECORD POSÉ"} ★</span>`
+    ? `<span class="ribbon">★ ${prev > 0 ? T[LANG].youBeat(fmt(prev)) : t("firstRecord")} ★</span>`
     : prev > 0
-      ? `<span class="ribbon quiet">Record à battre : ${fmt(prev)} — il te manquait ${fmt(prev - S.score)}</span>`
-      : `<span class="ribbon quiet">Tape au moins une forme pour poser ton premier record</span>`;
+      ? `<span class="ribbon quiet">${T[LANG].missMsg(fmt(prev), fmt(prev - S.score))}</span>`
+      : `<span class="ribbon quiet">${t("tapToSetRecord")}</span>`;
   $("finalStats").innerHTML = [
-    [S.hits, "Touches"], [acc + "%", "Précision"],
-    ["×" + S.bestCombo, "Chaîne max"], ["P" + S.level, "Palier"]
+    [S.hits, t("hits")], [acc + "%", t("accuracy")],
+    ["×" + S.bestCombo, t("bestChain")], ["P" + S.level, t("palier")]
   ].map(([v, l]) => `<div class="stat"><b>${v}</b><span>${l}</span></div>`).join("");
-  $("finalCoins").textContent = "+" + fmt(coins) + " éclats";
+  $("finalCoins").textContent = "+" + fmt(coins) + " " + t("sparks");
 
   if (isRecord) Sound.record();   // le son « temps écoulé » a déjà sonné à l'échéance
   showVeil("s-over");
@@ -1929,7 +2051,17 @@ function applyTheme() {
 function syncSettings() {
   $("swSound").classList.toggle("on", save.sound);
   $("swHaptics").classList.toggle("on", save.haptics !== false);
+  document.querySelectorAll("#langSegs .seg")
+    .forEach(b => b.classList.toggle("on", b.dataset.langOpt === save.lang));
   applyTheme();
+}
+// Bascule de langue : recharge tous les textes (statiques + listes dynamiques).
+function applyLang() {
+  refreshLang();
+  applyStatic();
+  buildModes();
+  buildShop();
+  syncSettings();
 }
 
 function buildModes() {
@@ -1937,8 +2069,8 @@ function buildModes() {
     const b = save.best[k];
     return `<button class="mode" data-mode="${k}" style="--mc:${m.color}">
       <span class="glyph">${m.glyph}</span>
-      <span><span class="nm">${m.name}</span><span class="ds">${m.desc}</span></span>
-      <span class="rec">Record<b class="${b > 0 ? "gold" : ""}">${b > 0 ? fmt(b) : "—"}</b></span>
+      <span><span class="nm">${tl(m.name)}</span><span class="ds">${tl(m.desc)}</span></span>
+      <span class="rec">${t("recordLabel")}<b class="${b > 0 ? "gold" : ""}">${b > 0 ? fmt(b) : "—"}</b></span>
     </button>`;
   }).join("");
   $("modeList").querySelectorAll(".mode").forEach(b =>
@@ -2024,13 +2156,13 @@ function buildShop() {
       const el = document.createElement("div");
       el.className = "item" + (on ? " equipped" : "");
       const info = document.createElement("div");
-      info.innerHTML = `<div class="nm">${it.name}</div><div class="ds">${it.desc}</div>`;
+      info.innerHTML = `<div class="nm">${tl(it.name)}</div><div class="ds">${tl(it.desc)}</div>`;
       const act = document.createElement("div");
       act.className = "act";
-      if (on) act.innerHTML = `<span class="tag on">✓ Équipé</span>`;
+      if (on) act.innerHTML = `<span class="tag on">✓ ${t("equipped")}</span>`;
       else if (owned) {
         const b = document.createElement("button");
-        b.className = "mini sec"; b.textContent = "Équiper";
+        b.className = "mini sec"; b.textContent = t("equip");
         b.onclick = () => { save.equip[kind] = id; persist(); Sound.ui(); buildShop(); };
         act.appendChild(b);
       } else {
@@ -2040,7 +2172,7 @@ function buildShop() {
         const b = document.createElement("button");
         b.className = "mini";
         const short = it.price - save.coins;
-        b.textContent = short > 0 ? "Il te manque " + fmt(short) : "Acheter";
+        b.textContent = short > 0 ? T[LANG].missShort(fmt(short)) : t("buy");
         b.disabled = short > 0;
         b.onclick = () => {
           if (save.coins < it.price) return;
@@ -2108,10 +2240,12 @@ $("setShop").addEventListener("click", () => { Sound.ui(); buildShop(); showVeil
 $("setModes").addEventListener("click", () => { Sound.ui(); buildModes(); showVeil("s-modes"); });
 $("setHow").addEventListener("click", () => { Sound.ui(); showVeil("s-how"); });
 $("setWipe").addEventListener("click", () => {
-  save = structuredClone(DEFAULT_SAVE); persist(); applyTheme(); syncSettings(); Sound.ui(); showVeil("s-home");
+  save = structuredClone(DEFAULT_SAVE); persist(); applyLang(); Sound.ui(); showVeil("s-home");
 });
 document.querySelectorAll("#themeSegs .seg").forEach(b =>
   b.addEventListener("click", () => { save.theme = b.dataset.themeOpt; persist(); applyTheme(); Sound.ui(); }));
+document.querySelectorAll("#langSegs .seg").forEach(b =>
+  b.addEventListener("click", () => { save.lang = b.dataset.langOpt; persist(); applyLang(); Sound.ui(); }));
 
 addEventListener("keydown", e => {
   if (e.key === "Escape") { S.phase === "play" ? pauseGame() : (S.phase === "pause" && resumeGame()); }
@@ -2124,6 +2258,8 @@ if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
   addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 }
 
+refreshLang();
+applyStatic();
 applyTheme();
 S.mode = "zen";
 resize();
