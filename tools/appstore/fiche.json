@@ -75,10 +75,10 @@
           ]
         ],
         "fichiers": [
-          "tools/appstore/captures/ios/1_home_ios69.png",
-          "tools/appstore/captures/ios/2_modes_ios69.png",
-          "tools/appstore/captures/ios/3_play_ios69.png",
-          "tools/appstore/captures/ios/4_shop_ios69.png"
+          "tools/appstore/captures/ios/1_home_ios69_en.png",
+          "tools/appstore/captures/ios/2_modes_ios69_en.png",
+          "tools/appstore/captures/ios/3_play_ios69_en.png",
+          "tools/appstore/captures/ios/4_shop_ios69_en.png"
         ]
       }
     }
